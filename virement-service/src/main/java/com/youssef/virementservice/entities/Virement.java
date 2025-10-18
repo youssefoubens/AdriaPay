@@ -27,6 +27,8 @@ public class Virement {
     // Relation with Beneficiaire
     @Transient
     private Beneficiaire beneficiaire;
+    @Column(nullable = false, length = 24)
+    private String beneficiaireRib;
 
     @Column(nullable = false, length = 24)
     private String ribSource;

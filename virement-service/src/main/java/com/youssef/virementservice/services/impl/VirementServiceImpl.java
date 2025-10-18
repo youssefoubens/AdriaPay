@@ -87,10 +87,11 @@ public class VirementServiceImpl implements VirementService {
         return virementRepository.findByBeneficiaireRib(rib)
                 .stream()
                 .map(v -> {
-                    VirementDTO dto = virementMapper.toDTO((Virement) v);
-                    dto.setBeneficiaire(((Virement) v).getBeneficiaire());
+                    VirementDTO dto = virementMapper.toDTO(v);
+                    dto.setBeneficiaire(v.getBeneficiaire());
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
+
 }
