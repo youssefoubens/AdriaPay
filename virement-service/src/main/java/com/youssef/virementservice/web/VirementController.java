@@ -16,11 +16,11 @@ public class VirementController {
     private final VirementService virementService;
 
     // Create a new virement
-    @PostMapping
-    public ResponseEntity<VirementDTO> createVirement(@RequestBody VirementDTO virementDTO) {
-        VirementDTO saved = virementService.saveVirement(virementDTO);
-        return ResponseEntity.ok(saved);
-    }
+//    @PostMapping
+//    public ResponseEntity<VirementDTO> createVirement(@RequestBody VirementDTO virementDTO) {
+//        VirementDTO saved = virementService.saveVirement(virementDTO);
+//        return ResponseEntity.ok(saved);
+//    }
 
     // Update an existing virement
     @PutMapping("/{id}")

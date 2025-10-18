@@ -150,4 +150,10 @@ public class BeneficiaireServiceImpl implements IBeneficiaireService {
     public long countActifs() {
         return beneficiaireRepository.countByActifTrue();
     }
+
+    @Override
+    public BeneficiaireResponseDTO getBeneficiaireByRib(String rib) {
+        return beneficiaireMapper.toResponseDTO(beneficiaireRepository.findByRib(rib)
+                .orElseThrow(() -> new RuntimeException("Bénéficiaire avec RIB " + rib + " introuvable")));
+    }
 }

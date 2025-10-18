@@ -1,3 +1,4 @@
+
 package com.youssef.virementservice.services.impl;
 
 import com.youssef.virementservice.client.BeneficiaireClient;
@@ -29,6 +30,14 @@ public class VirementServiceImpl implements VirementService {
         virementDTO.setBeneficiaire(beneficiaire);
 
         Virement virement = virementMapper.toEntity(virementDTO);
+
+        // Ensure beneficiaireRib is set from the beneficiaire object
+        if (beneficiaire != null && beneficiaire.getRib() != null) {
+            virement.setBeneficiaireRib(beneficiaire.getRib());
+        } else {
+            throw new RuntimeException("Beneficiaire RIB cannot be null");
+        }
+
         Virement saved = virementRepository.save(virement);
 
         VirementDTO dto = virementMapper.toDTO(saved);
@@ -47,6 +56,11 @@ public class VirementServiceImpl implements VirementService {
         existing.setType(virementDTO.getType());
         existing.setRibSource(virementDTO.getRibSource());
         existing.setActif(virementDTO.getActif());
+
+        // Update beneficiaireRib if beneficiaire is provided
+        if (virementDTO.getBeneficiaire() != null && virementDTO.getBeneficiaire().getRib() != null) {
+            existing.setBeneficiaireRib(virementDTO.getBeneficiaire().getRib());
+        }
 
         Virement updated = virementRepository.save(existing);
 
@@ -83,6 +97,7 @@ public class VirementServiceImpl implements VirementService {
     }
 
     @Override
+
     public List<VirementDTO> getVirementsByBeneficiaireRib(String rib) {
         return virementRepository.findByBeneficiaireRib(rib)
                 .stream()

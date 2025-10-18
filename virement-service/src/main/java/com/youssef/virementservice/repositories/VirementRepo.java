@@ -14,6 +14,6 @@ public interface VirementRepo extends JpaRepository<Virement, Long> {
     @Query("SELECT v FROM Virement v WHERE v.beneficiaireRib = :rib")
     List<Virement> findByBeneficiaireRib(@Param("rib") String rib);
 
-    // Optionally, find active virements
+
     List<Virement> findByActifTrue();
 }

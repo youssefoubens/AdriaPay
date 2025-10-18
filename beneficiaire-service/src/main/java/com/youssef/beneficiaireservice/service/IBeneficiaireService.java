@@ -5,6 +5,7 @@ package com.youssef.beneficiaireservice.service;
 import com.youssef.beneficiaireservice.dto.BeneficiaireRequestDTO;
 import com.youssef.beneficiaireservice.dto.BeneficiaireResponseDTO;
 import com.youssef.beneficiaireservice.dto.BeneficiaireUpdateDTO;
+import com.youssef.beneficiaireservice.entities.Beneficiaire;
 import com.youssef.beneficiaireservice.enums.TypeBeneficiaire;
 
 import java.util.List;
@@ -176,4 +177,6 @@ public interface IBeneficiaireService {
      * @return Le nombre de bénéficiaires actifs
      */
     long countActifs();
+
+    BeneficiaireResponseDTO getBeneficiaireByRib(String rib);
 }

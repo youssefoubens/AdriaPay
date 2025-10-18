@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@Service
-@FeignClient(name = "beneficiaire-service") // Eureka service name
+
+@FeignClient(name = "beneficiaire-service", url = "http://localhost:8071") // Eureka service name
 public interface BeneficiaireClient {
 
     @GetMapping("/api/beneficiaires/{id}")

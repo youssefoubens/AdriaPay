@@ -4,6 +4,7 @@ package com.youssef.beneficiaireservice.web;
 
 import com.youssef.beneficiaireservice.dto.*;
 
+import com.youssef.beneficiaireservice.entities.Beneficiaire;
 import com.youssef.beneficiaireservice.enums.TypeBeneficiaire;
 import com.youssef.beneficiaireservice.mapper.BeneficiaireMapper;
 import com.youssef.beneficiaireservice.service.IBeneficiaireService;
@@ -89,5 +90,11 @@ public class BeneficiaireController {
         long count = beneficiaireService.countActifs();
         return ResponseEntity.ok(count);
     }
+
+    @GetMapping("/by-rib")
+    public BeneficiaireResponseDTO getBeneficiaireByRib(@RequestParam String rib) {
+        return beneficiaireService.getBeneficiaireByRib(rib);
+    }
+
 }
 
