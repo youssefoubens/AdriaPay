@@ -1,6 +1,7 @@
 package com.youssef.chatbotservice.web;
 
 
+import com.youssef.chatbotservice.dto.*;
 import com.youssef.chatbotservice.services.RagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

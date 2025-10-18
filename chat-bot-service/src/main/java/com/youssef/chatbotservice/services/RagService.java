@@ -1,6 +1,8 @@
 package com.youssef.chatbotservice.services;
 
+import com.youssef.chatbotservice.dto.*;
 import com.youssef.chatbotservice.entities.ChatMessage;
+import com.youssef.chatbotservice.entities.Document;
 import com.youssef.chatbotservice.repository.ChatMessageRepository;
 import com.youssef.chatbotservice.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
