@@ -1,5 +1,12 @@
 package com.youssef.beneficiaireservice.dto;
 
+
+import com.youssef.beneficiaireservice.enums.TypeBeneficiaire;
+import jakarta.validation.constraints.*;
+import lombok.*;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Data
 @Builder
 @NoArgsConstructor

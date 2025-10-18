@@ -30,8 +30,7 @@ public interface BeneficiaireRepo extends JpaRepository<Beneficiaire, Long> {
     @Query("SELECT b FROM Beneficiaire b " +
             "WHERE LOWER(b.nom) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "   OR LOWER(b.prenom) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "   OR LOWER(b.rib) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "   OR LOWER(b.cin) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+            "   OR LOWER(b.rib) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Beneficiaire> searchByNomOrPrenom(@Param("keyword") String keyword);
 
     // === Search with optional filters ===
@@ -39,8 +38,7 @@ public interface BeneficiaireRepo extends JpaRepository<Beneficiaire, Long> {
            SELECT b FROM Beneficiaire b
            WHERE (:type IS NULL OR b.type = :type)
              AND (:actif IS NULL OR b.actif = :actif)
-             AND (
-                 :keyword IS NULL OR
+             AND (:keyword IS NULL OR 
                  LOWER(b.nom) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
                  LOWER(b.prenom) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
                  LOWER(b.rib) LIKE LOWER(CONCAT('%', :keyword, '%'))
