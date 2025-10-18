@@ -44,8 +44,9 @@ public class Document {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "metadata", columnDefinition = "jsonb")
-    private String metadata;
+
+//    @Column(name = "metadata", columnDefinition = "jsonb")
+//    private String metadata;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
