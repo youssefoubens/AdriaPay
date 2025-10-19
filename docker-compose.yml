@@ -1,0 +1,190 @@
+version: "3.9"
+
+services:
+  # ==================== DATABASE (for Chatbot) ====================
+
+  postgres-chatbot:
+    image: pgvector/pgvector:pg15
+    container_name: postgres-chatbot
+    restart: always
+    environment:
+      POSTGRES_DB: chatbot_db
+      POSTGRES_USER: youssef
+      POSTGRES_PASSWORD: 12345
+    ports:
+      - "5432:5432"
+    volumes:
+      - chatbot_data:/var/lib/postgresql/data
+      - ./chatbot-service/init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U youssef -d chatbot_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bank-network
+
+  # ==================== EUREKA SERVER ====================
+
+  eureka-service:
+    build:
+      context: ./eureka-service
+      dockerfile: Dockerfile
+    container_name: eureka-service
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+    networks:
+      - bank-network
+
+  # ==================== CONFIG SERVER ====================
+
+  config-service:
+    build:
+      context: ./config-service
+      dockerfile: Dockerfile
+    container_name: config-service
+    ports:
+      - "8070:8070"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8070/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - bank-network
+
+  # ==================== BENEFICIAIRE SERVICE ====================
+
+  beneficiaire-service:
+    build:
+      context: ./beneficiaire-service
+      dockerfile: Dockerfile
+    container_name: beneficiaire-service
+    ports:
+      - "8071:8071"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
+      CONFIG_SERVER_URL: http://config-service:8070
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8071/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - bank-network
+    restart: on-failure
+
+  # ==================== VIREMENT SERVICE ====================
+
+  virement-service:
+    build:
+      context: ./virement-service
+      dockerfile: Dockerfile
+    container_name: virement-service
+    ports:
+      - "8072:8072"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      beneficiaire-service:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
+      CONFIG_SERVER_URL: http://config-service:8070
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8072/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - bank-network
+    restart: on-failure
+
+  # ==================== CHATBOT SERVICE ====================
+
+  chatbot-service:
+    build:
+      context: ./chatbot-service
+      dockerfile: Dockerfile
+    container_name: chatbot-service
+    ports:
+      - "8074:8074"
+    depends_on:
+      postgres-chatbot:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-chatbot:5432/chatbot_db
+      SPRING_DATASOURCE_USERNAME: youssef
+      SPRING_DATASOURCE_PASSWORD: 12345
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
+      CONFIG_SERVER_URL: http://config-service:8070
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    volumes:
+      - ./chatbot-service/pdf-documents:/app/pdf-documents
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8074/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - bank-network
+    restart: on-failure
+
+  # ==================== GATEWAY SERVICE ====================
+
+  gateway-service:
+    build:
+      context: ./Gateway
+      dockerfile: Dockerfile
+    container_name: gateway-service
+    ports:
+      - "8073:8073"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+      beneficiaire-service:
+        condition: service_healthy
+      virement-service:
+        condition: service_healthy
+      chatbot-service:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
+      CONFIG_SERVER_URL: http://config-service:8070
+    networks:
+      - bank-network
+    restart: on-failure
+
+volumes:
+  chatbot_data:
+    driver: local
+
+networks:
+  bank-network:
+    driver: bridge
