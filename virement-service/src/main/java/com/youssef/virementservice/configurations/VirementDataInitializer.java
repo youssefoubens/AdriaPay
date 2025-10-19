@@ -69,8 +69,8 @@ public class VirementDataInitializer {
                     .build();
 
             // Save Virements
-            virementService.saveVirement(v1);
-            virementService.saveVirement(v2);
+//            virementService.saveVirement(v1);
+//            virementService.saveVirement(v2);
 
             System.out.println("Sample virements initialized!");
         };
