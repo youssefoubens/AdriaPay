@@ -1,11 +1,10 @@
-from openjdk:21-slim
+FROM openjdk:21-jdk-slim
 
+# Set working directory inside container
+WORKDIR /app
 
-WORKDIR  /app
+# Copy the jar from target directory
+COPY ./target/*.jar app.jar
 
-COPY ./target/beneficiaire-service-0.0.1-SNAPSHOT.jar app.jar
-
-EXPOSE 8071
-
-
-ENTRYPOINT ["java","-jar","app.jar"]
+# Run the jar file
+ENTRYPOINT ["java", "-jar", "app.jar"]

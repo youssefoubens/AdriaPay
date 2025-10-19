@@ -10,6 +10,7 @@
         <option value="$PROJECT_DIR$/beneficiaire-service/pom.xml" />
         <option value="$PROJECT_DIR$/virement-service/pom.xml" />
         <option value="$PROJECT_DIR$/chat-bot-service/pom.xml" />
+        <option value="$PROJECT_DIR$/chatbot-service/pom.xml" />
       </list>
     </option>
   </component>
