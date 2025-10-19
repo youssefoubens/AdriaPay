@@ -2,7 +2,6 @@ version: "3.9"
 
 services:
   # ==================== DATABASE (for Chatbot) ====================
-
   postgres-chatbot:
     image: pgvector/pgvector:pg15
     container_name: postgres-chatbot
@@ -12,39 +11,14 @@ services:
       POSTGRES_USER: youssef
       POSTGRES_PASSWORD: 12345
     ports:
-      - "5433:5432" # ✅ fixed mapping (container always listens on 5432)
+      - "5433:5432"
     volumes:
       - chatbot_data:/var/lib/postgresql/data
       - ./chatbot-service/init-scripts:/docker-entrypoint-initdb.d
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U youssef -d chatbot_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - bank-network
-
-  # ==================== CONFIG SERVER ====================
-
-  config-service:
-    build:
-      context: ./config-service
-      dockerfile: Dockerfile
-    container_name: config-service
-    ports:
-      - "8070:8070"
-    environment:
-      SPRING_PROFILES_ACTIVE: native
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8070/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - bank-network
 
   # ==================== EUREKA SERVER ====================
-
   eureka-service:
     build:
       context: ./eureka-service
@@ -52,21 +26,25 @@ services:
     container_name: eureka-service
     ports:
       - "8761:8761"
-    depends_on:
-      config-service:
-        condition: service_healthy
-    environment:
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8070
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
     networks:
       - bank-network
 
-  # ==================== MICROSERVICES ====================
+  # ==================== CONFIG SERVER ====================
+  config-service:
+    build:
+      context: ./config-service
+      dockerfile: Dockerfile
+    container_name: config-service
+    ports:
+      - "8070:8070"
+    depends_on:
+      - eureka-service   # config dépend d’Eureka
+    networks:
+      - bank-network
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
 
+  # ==================== BENEFICIAIRE SERVICE ====================
   beneficiaire-service:
     build:
       context: ./beneficiaire-service
@@ -75,16 +53,13 @@ services:
     ports:
       - "8071:8071"
     depends_on:
-      eureka-service:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8070
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
+      - config-service   # bénéficiaire dépend de config
     networks:
       - bank-network
-    restart: on-failure
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
 
+  # ==================== VIREMENT SERVICE ====================
   virement-service:
     build:
       context: ./virement-service
@@ -93,18 +68,13 @@ services:
     ports:
       - "8072:8072"
     depends_on:
-      eureka-service:
-        condition: service_healthy
-      beneficiaire-service:
-        condition: service_started
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8070
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
+      - beneficiaire-service  # virement dépend de bénéficiaire
     networks:
       - bank-network
-    restart: on-failure
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
 
+  # ==================== CHATBOT SERVICE ====================
   chatbot-service:
     build:
       context: ./chat-bot-service
@@ -113,26 +83,17 @@ services:
     ports:
       - "8074:8074"
     depends_on:
-      eureka-service:
-        condition: service_healthy
-      postgres-chatbot:
-        condition: service_healthy
+      - postgres-chatbot   # chatbot dépend de la DB
+      - config-service     # chatbot dépend de config
+    networks:
+      - bank-network
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8070
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-chatbot:5432/chatbot_db
       SPRING_DATASOURCE_USERNAME: youssef
       SPRING_DATASOURCE_PASSWORD: 12345
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-    volumes:
-      - ./chatbot-service/pdf-documents:/app/pdf-documents
-    networks:
-      - bank-network
-    restart: on-failure
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
 
-  # ==================== GATEWAY ====================
-
+  # ==================== GATEWAY SERVICE ====================
   gateway-service:
     build:
       context: ./Gateway
@@ -141,28 +102,18 @@ services:
     ports:
       - "8073:8073"
     depends_on:
-      eureka-service:
-        condition: service_healthy
-      beneficiaire-service:
-        condition: service_started
-      virement-service:
-        condition: service_started
-      chatbot-service:
-        condition: service_started
-    environment:
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8070
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
+      - eureka-service
+      - beneficiaire-service
+      - virement-service
+      - chatbot-service
     networks:
       - bank-network
-    restart: on-failure
-
-# ==================== VOLUMES ====================
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:8761/eureka
 
 volumes:
   chatbot_data:
     driver: local
-
-# ==================== NETWORKS ====================
 
 networks:
   bank-network:

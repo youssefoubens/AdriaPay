@@ -19,10 +19,23 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.40/lombok-1.18.40.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.6.3/mapstruct-1.6.3.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.40/lombok-1.18.40.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.6.3/mapstruct-1.6.3.jar" />
         </processorPath>
         <module name="virement-service" />
+      </profile>
+      <profile name="Annotation profile for chatbot-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.40/lombok-1.18.40.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.6.3/mapstruct-1.6.3.jar" />
+        </processorPath>
+        <module name="chatbot-service" />
         <module name="beneficiaire-service" />
-        <module name="chat-bot-service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -30,7 +43,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="Gateway" options="-parameters" />
       <module name="beneficiaire-service" options="-parameters" />
-      <module name="chat-bot-service" options="-parameters" />
+      <module name="chatbot-service" options="-parameters" />
       <module name="config-service" options="-parameters" />
       <module name="eureka-service" options="-parameters" />
       <module name="virement-service" options="-parameters" />
