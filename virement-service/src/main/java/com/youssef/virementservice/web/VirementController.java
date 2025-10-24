@@ -3,11 +3,12 @@ package com.youssef.virementservice.web;
 import com.youssef.virementservice.dto.VirementDTO;
 import com.youssef.virementservice.services.VirementService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@RefreshScope
 @RestController
 @RequestMapping("/api/virements")
 @RequiredArgsConstructor
@@ -16,11 +17,11 @@ public class VirementController {
     private final VirementService virementService;
 
     // Create a new virement
-//    @PostMapping
-//    public ResponseEntity<VirementDTO> createVirement(@RequestBody VirementDTO virementDTO) {
-//        VirementDTO saved = virementService.saveVirement(virementDTO);
-//        return ResponseEntity.ok(saved);
-//    }
+    @PostMapping
+    public ResponseEntity<VirementDTO> createVirement(@RequestBody VirementDTO virementDTO) {
+        VirementDTO saved = virementService.saveVirement(virementDTO);
+        return ResponseEntity.ok(saved);
+    }
 
     // Update an existing virement
     @PutMapping("/{id}")

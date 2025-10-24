@@ -12,12 +12,13 @@ import com.youssef.beneficiaireservice.service.IBeneficiaireService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@RefreshScope
 @RestController
 @RequestMapping("/api/beneficiaires")
 @RequiredArgsConstructor
