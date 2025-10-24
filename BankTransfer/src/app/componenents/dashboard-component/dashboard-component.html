@@ -1,0 +1,125 @@
+<!-- src/app/components/dashboard/dashboard.component.html -->
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
+  <div class="layout-container flex h-full grow flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f3f4] dark:border-b-gray-700 px-10 py-3 bg-white dark:bg-background-dark">
+      <div class="flex items-center gap-4">
+        <div class="size-8 text-primary">
+          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+          </svg>
+        </div>
+        <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Bank POC</h2>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="font-medium">John Doe</span>
+        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 bg-gray-300"></div>
+        <button (click)="logout()" class="flex items-center justify-center rounded-lg h-10 w-10 bg-[#f0f3f4] dark:bg-gray-700/50 text-[#111618] dark:text-white">
+          <span class="material-symbols-outlined">logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 px-4 sm:px-6 lg:px-10 py-8">
+      <div class="max-w-7xl mx-auto">
+        <!-- Page Title and Actions -->
+        <div class="flex flex-wrap justify-between gap-3 items-center mb-8">
+          <p class="text-4xl font-black leading-tight tracking-[-0.033em]">Dashboard</p>
+          <div class="flex gap-2 sm:gap-4">
+            <button (click)="navigateToBeneficiaries()" class="flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold">
+              <span class="material-symbols-outlined">group</span>
+              <span class="hidden sm:inline">Manage Beneficiaries</span>
+            </button>
+            <button (click)="navigateToNewTransfer()" class="flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-green-600 text-white text-sm font-bold">
+              <span class="material-symbols-outlined">paid</span>
+              <span class="hidden sm:inline">New Transfer</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+          {{ error }}
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="loading" class="flex justify-center items-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div class="flex flex-col gap-2 rounded-xl p-6 border border-[#dbe2e6] dark:border-gray-700 bg-white dark:bg-background-dark shadow-sm">
+            <div class="flex items-center gap-4">
+              <div class="p-3 rounded-full bg-primary/20 text-primary">
+                <span class="material-symbols-outlined">groups</span>
+              </div>
+              <p class="text-base font-medium text-gray-600 dark:text-gray-400">Total Beneficiaries</p>
+            </div>
+            <p class="text-4xl font-bold leading-tight">{{ stats.totalBeneficiaries }}</p>
+          </div>
+
+          <div class="flex flex-col gap-2 rounded-xl p-6 border border-[#dbe2e6] dark:border-gray-700 bg-white dark:bg-background-dark shadow-sm">
+            <div class="flex items-center gap-4">
+              <div class="p-3 rounded-full bg-primary/20 text-primary">
+                <span class="material-symbols-outlined">swap_horiz</span>
+              </div>
+              <p class="text-base font-medium text-gray-600 dark:text-gray-400">Total Transfers</p>
+            </div>
+            <p class="text-4xl font-bold leading-tight">{{ stats.totalTransfers }}</p>
+          </div>
+
+          <div class="flex flex-col gap-2 rounded-xl p-6 border border-[#dbe2e6] dark:border-gray-700 bg-white dark:bg-background-dark shadow-sm">
+            <div class="flex items-center gap-4">
+              <div class="p-3 rounded-full bg-primary/20 text-primary">
+                <span class="material-symbols-outlined">history</span>
+              </div>
+              <p class="text-base font-medium text-gray-600 dark:text-gray-400">Recent Transactions (7d)</p>
+            </div>
+            <p class="text-4xl font-bold leading-tight">{{ stats.recentTransactions }}</p>
+          </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] mb-4">Recent Transactions</h2>
+        <div class="overflow-x-auto">
+          <div class="rounded-xl border border-[#dbe2e6] dark:border-gray-700 bg-white dark:bg-background-dark shadow-sm">
+            <table class="w-full">
+              <thead>
+              <tr class="border-b border-b-[#dbe2e6] dark:border-b-gray-700">
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">Beneficiary</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let transaction of recentTransactions" class="border-t border-t-[#dbe2e6] dark:border-t-gray-700">
+                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ transaction.date | date }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ transaction.beneficiaryName }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ formatAmount(transaction.amount) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span [ngClass]="getStatusClass(transaction.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                      {{ transaction.status }}
+                    </span>
+                </td>
+              </tr>
+              <tr *ngIf="recentTransactions.length === 0 && !loading">
+                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                  No recent transactions found
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Floating Chat Button -->
+  <button [routerLink]="['/chatbot']" class="fixed bottom-8 right-8 flex items-center justify-center gap-2 rounded-full h-16 w-16 bg-primary text-white shadow-lg transition-transform hover:scale-105">
+    <span class="material-symbols-outlined text-3xl">chat</span>
+  </button>
+</div>
