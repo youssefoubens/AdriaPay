@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AdriaPay.iml" filepath="$PROJECT_DIR$/AdriaPay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BankTransfer/BankTransfer.iml" filepath="$PROJECT_DIR$/BankTransfer/BankTransfer.iml" />
     </modules>
   </component>
 </project>
