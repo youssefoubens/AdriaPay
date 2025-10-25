@@ -1,12 +1,17 @@
-// src/app/components/transfer/transfer.component.ts
+// src/app/componenents/transfer-component/transfer-component.ts
 import { Component, OnInit } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { TransferService, Transfer } from '../../services/TransferService/transfer-service';
 import { BeneficiaryService, Beneficiary } from '../../services/BeneficiaryService/beneficiary-service';
 
 @Component({
   selector: 'app-transfer',
-  templateUrl: './transfer.component.html',
-  styleUrls: ['./transfer.component.css']
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule, DatePipe],
+  templateUrl: './transfer-component.html',
+  styleUrls: ['./transfer-component.css']
 })
 export class TransferComponent implements OnInit {
   transfers: Transfer[] = [];

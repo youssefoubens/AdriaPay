@@ -1,11 +1,16 @@
-// src/app/components/beneficiary/beneficiary.component.ts
+// src/app/componenents/beneficiary-component/beneficiary-component.ts
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { BeneficiaryService, Beneficiary } from '../../services/BeneficiaryService/beneficiary-service';
 
 @Component({
   selector: 'app-beneficiary',
-  templateUrl: './beneficiary.component.html',
-  styleUrls: ['./beneficiary.component.css']
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
+  templateUrl: './beneficiary-component.html',
+  styleUrls: ['./beneficiary-component.css']
 })
 export class BeneficiaryComponent implements OnInit {
   beneficiaries: Beneficiary[] = [];

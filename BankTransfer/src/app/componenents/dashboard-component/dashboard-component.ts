@@ -1,13 +1,15 @@
-// src/app/components/dashboard/dashboard.component.ts
+// src/app/componenents/dashboard-component/dashboard-component.ts
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { TransferService, Transfer, DashboardStats } from '../../services/TransferService/transfer-service';
 
 @Component({
   selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css'],
-  standalone:true
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './dashboard-component.html',
+  styleUrls: ['./dashboard-component.css']
 })
 export class DashboardComponent implements OnInit {
   stats: DashboardStats = {
@@ -64,11 +66,11 @@ export class DashboardComponent implements OnInit {
   }
 
   navigateToNewTransfer(): void {
-    this.router.navigate(['/transfers/new']);
+    this.router.navigate(['/transfer']);
   }
 
   navigateToTransfers(): void {
-    this.router.navigate(['/transfers']);
+    this.router.navigate(['/transfer']);
   }
 
   getStatusClass(status?: string): string {
