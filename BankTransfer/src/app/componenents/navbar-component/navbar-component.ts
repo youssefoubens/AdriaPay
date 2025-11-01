@@ -13,7 +13,7 @@ import { filter } from 'rxjs/operators';
 })
 export class NavbarComponent implements OnInit {
   currentRoute = '/dashboard';
-  userName = 'John Doe';
+  userName = 'Youssef Ouben Said';
   userEmail = 'john.doe@example.com';
   isMenuOpen = false;
   isMobileMenuOpen = false;
@@ -49,7 +49,7 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit(): void {
     // Get user info from localStorage
-    this.userName = localStorage.getItem('userName') || 'John Doe';
+    this.userName = localStorage.getItem('userName') || 'Youssef Ouben Said ';
     this.userEmail = localStorage.getItem('userEmail') || 'john.doe@example.com';
 
     // Set initial active route
