@@ -20,7 +20,7 @@ export interface ChatResponse {
   providedIn: 'root'
 })
 export class ChatbotService {
-  private apiUrl = `${environment.apiUrl}/chatbot-service/api/chat`;
+  private apiUrl = `${environment.apiUrl}/CHATBOT-SERVICE/api/chatbot`;
   private messagesSubject = new BehaviorSubject<Message[]>([
     {
       id: '1',

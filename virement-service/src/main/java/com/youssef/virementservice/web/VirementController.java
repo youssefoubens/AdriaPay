@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/virements")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class VirementController {
 
     private final VirementService virementService;

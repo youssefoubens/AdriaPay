@@ -21,6 +21,7 @@ import java.util.List;
 @RequestMapping("/api/chatbot")
 @RequiredArgsConstructor
 @Tag(name = "Chatbot", description = "API du chatbot RAG pour les services bancaires")
+@CrossOrigin(origins = "*")
 public class ChatController {
 
     private final RagService ragService;

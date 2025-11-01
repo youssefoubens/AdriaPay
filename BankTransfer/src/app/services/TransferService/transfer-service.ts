@@ -26,7 +26,7 @@ export interface DashboardStats {
   providedIn: 'root'
 })
 export class TransferService {
-  private apiUrl = `${environment.apiUrl}/virement-service/api/transfers`;
+  private apiUrl = `${environment.apiUrl}/VIREMENT-SERVICE/api/virements`;
 
   constructor(private http: HttpClient) { }
 
