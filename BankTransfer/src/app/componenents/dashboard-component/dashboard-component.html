@@ -1,132 +1,190 @@
-<!-- src/app/componenents/dashboard-component/dashboard.component.html -->
+<!-- src/app/componenents/dashboard-component/dashboard-component.html -->
 <div class="dashboard-wrapper">
+  <!-- Navbar -->
+  <app-navbar></app-navbar>
+
   <div class="dashboard-container">
-    <!-- Header -->
-    <header class="dashboard-header">
-      <div class="header-left">
-        <div class="logo-icon">
-          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-            <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
-          </svg>
-        </div>
-        <h2 class="app-title">Bank POC</h2>
-      </div>
-
-      <div class="header-right">
-        <span class="user-name">John Doe</span>
-        <div class="user-avatar"></div>
-        <button (click)="logout()" class="logout-btn" data-tooltip="Logout">
-          <span class="material-symbols-outlined">logout</span>
-        </button>
-      </div>
-    </header>
-
     <!-- Main Content -->
     <main class="dashboard-main">
       <div class="content-wrapper">
         <!-- Page Header -->
         <div class="page-header">
-          <h1 class="page-title">Dashboard</h1>
+          <div class="header-content">
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Welcome back! Here's your account overview</p>
+          </div>
           <div class="action-buttons">
-            <button (click)="navigateToBeneficiaries()" class="btn btn-primary">
+            <button (click)="navigateToBeneficiaries()" class="btn btn-secondary">
               <span class="material-symbols-outlined">group</span>
-              <span class="btn-text">Manage Beneficiaries</span>
+              <span class="btn-text">Beneficiaries</span>
             </button>
-            <button (click)="navigateToNewTransfer()" class="btn btn-success">
-              <span class="material-symbols-outlined">paid</span>
+            <button (click)="navigateToNewTransfer()" class="btn btn-primary">
+              <span class="material-symbols-outlined">send</span>
               <span class="btn-text">New Transfer</span>
             </button>
           </div>
         </div>
 
         <!-- Error Message -->
-        <div *ngIf="error" class="error-message">
+        <div *ngIf="error" class="alert alert-error">
           <span class="material-symbols-outlined">error</span>
-          <p>{{ error }}</p>
+          <div class="alert-content">
+            <p class="alert-title">Error</p>
+            <p class="alert-message">{{ error }}</p>
+          </div>
+          <button class="alert-close" (click)="error = null">
+            <span class="material-symbols-outlined">close</span>
+          </button>
         </div>
 
         <!-- Loading State -->
         <div *ngIf="loading" class="loading-container">
           <div class="loading-spinner"></div>
-          <p>Loading dashboard data...</p>
+          <p class="loading-text">Loading your dashboard...</p>
         </div>
 
-        <!-- Stats Cards -->
-        <div *ngIf="!loading" class="stats-grid">
-          <div class="stats-card">
-            <div class="stat-icon-wrapper">
-              <div class="stat-icon bg-primary">
-                <span class="material-symbols-outlined">groups</span>
+        <!-- Dashboard Content -->
+        <div *ngIf="!loading" class="dashboard-content">
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card stat-card-1">
+              <div class="stat-header">
+                <div class="stat-icon-container">
+                  <span class="material-symbols-outlined stat-icon">account_balance_wallet</span>
+                </div>
+                <span class="stat-trend stat-trend-up">
+                  <span class="material-symbols-outlined">trending_up</span>
+                  12%
+                </span>
               </div>
-              <p class="stat-label">Total Beneficiaries</p>
+              <div class="stat-body">
+                <h3 class="stat-label">Total Beneficiaries</h3>
+                <p class="stat-value">{{ stats.totalBeneficiaries }}</p>
+                <p class="stat-description">Active recipients</p>
+              </div>
             </div>
-            <p class="stat-value">{{ stats.totalBeneficiaries }}</p>
+
+            <div class="stat-card stat-card-2">
+              <div class="stat-header">
+                <div class="stat-icon-container">
+                  <span class="material-symbols-outlined stat-icon">swap_horiz</span>
+                </div>
+                <span class="stat-trend stat-trend-up">
+                  <span class="material-symbols-outlined">trending_up</span>
+                  8%
+                </span>
+              </div>
+              <div class="stat-body">
+                <h3 class="stat-label">Total Transfers</h3>
+                <p class="stat-value">{{ stats.totalTransfers }}</p>
+                <p class="stat-description">All time transactions</p>
+              </div>
+            </div>
+
+            <div class="stat-card stat-card-3">
+              <div class="stat-header">
+                <div class="stat-icon-container">
+                  <span class="material-symbols-outlined stat-icon">schedule</span>
+                </div>
+                <span class="stat-trend stat-trend-neutral">
+                  <span class="material-symbols-outlined">remove</span>
+                  0%
+                </span>
+              </div>
+              <div class="stat-body">
+                <h3 class="stat-label">Recent Activity</h3>
+                <p class="stat-value">{{ stats.recentTransactions }}</p>
+                <p class="stat-description">Last 7 days</p>
+              </div>
+            </div>
           </div>
 
-          <div class="stats-card">
-            <div class="stat-icon-wrapper">
-              <div class="stat-icon bg-primary">
-                <span class="material-symbols-outlined">swap_horiz</span>
+          <!-- Recent Transactions -->
+          <div class="transactions-section">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title">Recent Transactions</h2>
+                <p class="section-subtitle">Your latest transfer activity</p>
               </div>
-              <p class="stat-label">Total Transfers</p>
+              <button (click)="navigateToTransfers()" class="btn-link">
+                View all
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
             </div>
-            <p class="stat-value">{{ stats.totalTransfers }}</p>
-          </div>
 
-          <div class="stats-card">
-            <div class="stat-icon-wrapper">
-              <div class="stat-icon bg-primary">
-                <span class="material-symbols-outlined">history</span>
+            <div class="transactions-card">
+              <div class="table-container">
+                <table class="transactions-table">
+                  <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>Beneficiary</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr *ngFor="let transaction of recentTransactions" class="transaction-row">
+                    <td>
+                      <div class="date-info">
+                        <span class="date-primary">{{ transaction.date | date:'MMM d, y' }}</span>
+                        <span class="date-secondary">{{ transaction.date | date:'h:mm a' }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="beneficiary-info">
+                        <div class="beneficiary-avatar">
+                          {{ getInitial(transaction.beneficiaryName) }}
+                        </div>
+                        <div class="beneficiary-details">
+                          <span class="beneficiary-name">{{ transaction.beneficiaryName || 'Unknown' }}</span>
+                          <span class="beneficiary-account">Account ending in ****</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="amount">{{ formatAmount(transaction.amount) }}</span>
+                    </td>
+                    <td>
+                        <span [ngClass]="getStatusClass(transaction.status)" class="status-badge">
+                          <span class="status-dot"></span>
+                          {{ transaction.status }}
+                        </span>
+                    </td>
+                    <td>
+                      <button class="btn-icon" title="View details">
+                        <span class="material-symbols-outlined">more_vert</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr *ngIf="recentTransactions.length === 0" class="empty-row">
+                    <td colspan="5">
+                      <div class="empty-state">
+                        <div class="empty-icon">
+                          <span class="material-symbols-outlined">inbox</span>
+                        </div>
+                        <h3 class="empty-title">No transactions yet</h3>
+                        <p class="empty-description">Start by making your first transfer</p>
+                        <button (click)="navigateToNewTransfer()" class="btn btn-primary">
+                          <span class="material-symbols-outlined">add</span>
+                          New Transfer
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
               </div>
-              <p class="stat-label">Recent Transactions</p>
             </div>
-            <p class="stat-value">{{ stats.recentTransactions }}</p>
-          </div>
-        </div>
-
-        <!-- Recent Transactions -->
-        <div class="transactions-section">
-          <h2 class="section-title">Recent Transactions</h2>
-
-          <div class="table-wrapper">
-            <table class="transactions-table">
-              <thead>
-              <tr>
-                <th>Date</th>
-                <th>Beneficiary</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr *ngFor="let transaction of recentTransactions">
-                <td class="date-cell">{{ transaction.date | date }}</td>
-                <td class="beneficiary-cell">{{ transaction.beneficiaryName }}</td>
-                <td class="amount-cell">{{ formatAmount(transaction.amount) }}</td>
-                <td class="status-cell">
-                    <span [ngClass]="getStatusClass(transaction.status)" class="status-badge">
-                      {{ transaction.status }}
-                    </span>
-                </td>
-              </tr>
-              <tr *ngIf="recentTransactions.length === 0 && !loading" class="empty-row">
-                <td colspan="4">
-                  <div class="empty-state">
-                    <span class="material-symbols-outlined">inbox</span>
-                    <p>No recent transactions found</p>
-                  </div>
-                </td>
-              </tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Floating Chat Button -->
-  <button [routerLink]="['/chatbot']" class="chat-button" data-tooltip="Chat with us">
-    <span class="material-symbols-outlined">chat</span>
+  <!-- Floating Action Button -->
+  <button [routerLink]="['/chatbot']" class="fab" title="Chat with support">
+    <span class="material-symbols-outlined">support_agent</span>
   </button>
 </div>

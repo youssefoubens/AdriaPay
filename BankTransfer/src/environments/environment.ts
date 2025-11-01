@@ -1,7 +1,7 @@
 // src/environments/environment.ts
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8888' // Gateway URL
+  apiUrl: 'http://localhost:8073' // Gateway URL
 };
 
 // src/environments/environment.prod.ts

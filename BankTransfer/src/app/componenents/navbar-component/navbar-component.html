@@ -1,115 +1,60 @@
-<!-- src/app/componenents/dashboard-component/dashboard.component.html -->
-<div class="dashboard-wrapper">
-  <!-- Navbar -->
-  <app-navbar></app-navbar>
+<!-- src/app/componenents/navbar-component/navbar-component.html -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo/Brand -->
+    <div class="navbar-brand">
+      <span class="material-symbols-outlined">account_balance</span>
+      <span class="brand-text">Transfer App</span>
+    </div>
 
-  <div class="dashboard-container">
-    <!-- Main Content -->
-    <main class="dashboard-main">
-      <div class="content-wrapper">
-        <!-- Page Header -->
-        <div class="page-header">
-          <h1 class="page-title">Dashboard</h1>
-          <div class="action-buttons">
-            <button (click)="navigateToBeneficiaries()" class="btn btn-primary">
-              <span class="material-symbols-outlined">group</span>
-              <span class="btn-text">Manage Beneficiaries</span>
-            </button>
-            <button (click)="navigateToNewTransfer()" class="btn btn-success">
-              <span class="material-symbols-outlined">paid</span>
-              <span class="btn-text">New Transfer</span>
-            </button>
-          </div>
+    <!-- Desktop Navigation -->
+    <div class="nav-links">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.route"
+         [class.active]="item.active"
+         class="nav-link">
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </div>
+
+    <!-- User Menu -->
+    <div class="user-menu">
+      <button (click)="toggleMenu()" class="user-button">
+        <span class="material-symbols-outlined">account_circle</span>
+        <span class="user-name">{{ userName }}</span>
+        <span class="material-symbols-outlined">expand_more</span>
+      </button>
+
+      <div *ngIf="isMenuOpen" class="dropdown-menu">
+        <div class="user-info">
+          <p class="user-name-full">{{ userName }}</p>
+          <p class="user-email">{{ userEmail }}</p>
         </div>
-
-        <!-- Error Message -->
-        <div *ngIf="error" class="error-message">
-          <span class="material-symbols-outlined">error</span>
-          <p>{{ error }}</p>
-        </div>
-
-        <!-- Loading State -->
-        <div *ngIf="loading" class="loading-container">
-          <div class="loading-spinner"></div>
-          <p>Loading dashboard data...</p>
-        </div>
-
-        <!-- Stats Cards -->
-        <div *ngIf="!loading" class="stats-grid">
-          <div class="stats-card">
-            <div class="stat-icon-wrapper">
-              <div class="stat-icon bg-primary">
-                <span class="material-symbols-outlined">groups</span>
-              </div>
-              <p class="stat-label">Total Beneficiaries</p>
-            </div>
-            <p class="stat-value">{{ stats.totalBeneficiaries }}</p>
-          </div>
-
-          <div class="stats-card">
-            <div class="stat-icon-wrapper">
-              <div class="stat-icon bg-primary">
-                <span class="material-symbols-outlined">swap_horiz</span>
-              </div>
-              <p class="stat-label">Total Transfers</p>
-            </div>
-            <p class="stat-value">{{ stats.totalTransfers }}</p>
-          </div>
-
-          <div class="stats-card">
-            <div class="stat-icon-wrapper">
-              <div class="stat-icon bg-primary">
-                <span class="material-symbols-outlined">history</span>
-              </div>
-              <p class="stat-label">Recent Transactions</p>
-            </div>
-            <p class="stat-value">{{ stats.recentTransactions }}</p>
-          </div>
-        </div>
-
-        <!-- Recent Transactions -->
-        <div class="transactions-section">
-          <h2 class="section-title">Recent Transactions</h2>
-
-          <div class="table-wrapper">
-            <table class="transactions-table">
-              <thead>
-              <tr>
-                <th>Date</th>
-                <th>Beneficiary</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr *ngFor="let transaction of recentTransactions">
-                <td class="date-cell">{{ transaction.date | date }}</td>
-                <td class="beneficiary-cell">{{ transaction.beneficiaryName }}</td>
-                <td class="amount-cell">{{ formatAmount(transaction.amount) }}</td>
-                <td class="status-cell">
-                    <span [ngClass]="getStatusClass(transaction.status)" class="status-badge">
-                      {{ transaction.status }}
-                    </span>
-                </td>
-              </tr>
-              <tr *ngIf="recentTransactions.length === 0 && !loading" class="empty-row">
-                <td colspan="4">
-                  <div class="empty-state">
-                    <span class="material-symbols-outlined">inbox</span>
-                    <p>No recent transactions found</p>
-                  </div>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <div class="menu-divider"></div>
+        <button (click)="logout()" class="menu-item">
+          <span class="material-symbols-outlined">logout</span>
+          <span>Logout</span>
+        </button>
       </div>
-    </main>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button (click)="toggleMobileMenu()" class="mobile-menu-toggle">
+      <span class="material-symbols-outlined">
+        {{ isMobileMenuOpen ? 'close' : 'menu' }}
+      </span>
+    </button>
   </div>
 
-  <!-- Floating Chat Button -->
-  <button [routerLink]="['/chatbot']" class="chat-button" data-tooltip="Chat with us">
-    <span class="material-symbols-outlined">chat</span>
-  </button>
-</div>
+  <!-- Mobile Navigation -->
+  <div *ngIf="isMobileMenuOpen" class="mobile-nav">
+    <a *ngFor="let item of navItems"
+       [routerLink]="item.route"
+       [class.active]="item.active"
+       class="mobile-nav-link">
+      <span class="material-symbols-outlined">{{ item.icon }}</span>
+      <span>{{ item.label }}</span>
+    </a>
+  </div>
+</nav>

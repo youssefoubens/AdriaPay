@@ -1,15 +1,16 @@
 // src/app/componenents/transfer-component/transfer-component.ts
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TransferService, Transfer } from '../../services/TransferService/transfer-service';
 import { BeneficiaryService, Beneficiary } from '../../services/BeneficiaryService/beneficiary-service';
+import { NavbarComponent } from '../navbar-component/navbar-component';
 
 @Component({
   selector: 'app-transfer',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DatePipe],
+  imports: [CommonModule, FormsModule, RouterModule, NavbarComponent],
   templateUrl: './transfer-component.html',
   styleUrls: ['./transfer-component.css']
 })
@@ -76,9 +77,9 @@ export class TransferComponent implements OnInit {
     const query = this.searchQuery.toLowerCase();
     this.filteredTransfers = this.transfers.filter(t =>
       t.beneficiaryName?.toLowerCase().includes(query) ||
-      t.sourceRib.toLowerCase().includes(query) ||
-      t.description.toLowerCase().includes(query) ||
-      t.amount.toString().includes(query)
+      t.sourceRib?.toLowerCase().includes(query) ||
+      t.description?.toLowerCase().includes(query) ||
+      t.amount?.toString().includes(query)
     );
   }
 
@@ -160,25 +161,34 @@ export class TransferComponent implements OnInit {
   }
 
   maskRib(rib: string): string {
-    if (rib.length <= 8) return rib;
-    return rib.substring(0, 4) + '...' + rib.substring(rib.length - 4);
+    if (!rib || rib.length <= 8) return rib;
+    return rib.substring(0, 4) + '****' + rib.substring(rib.length - 4);
   }
 
   formatAmount(amount: number): string {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'USD'
     }).format(amount);
   }
 
   getTypeClass(type: string): string {
-    return type === 'INSTANTANE'
-      ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
-      : 'bg-primary/20 text-primary';
+    return type === 'INSTANTANE' ? 'type-instant' : 'type-normal';
+  }
+
+  getInitial(name?: string): string {
+    return name?.charAt(0).toUpperCase() || '?';
+  }
+
+  truncateText(text: string, maxLength: number): string {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   }
 
   goToPage(page: number): void {
-    this.currentPage = page;
-    // Implement pagination logic here
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      // Implement pagination logic here
+    }
   }
 }

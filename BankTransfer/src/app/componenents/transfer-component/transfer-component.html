@@ -1,183 +1,399 @@
-<!-- src/app/components/transfer/transfer.component.html -->
-<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
-  <div class="layout-container flex h-full grow flex-col">
-    <!-- Header -->
-    <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f3f4] dark:border-b-gray-700 px-10 py-3 bg-white dark:bg-background-dark">
-      <div class="flex items-center gap-8">
-        <div class="flex items-center gap-4 text-[#111618] dark:text-white">
-          <div class="size-8 text-primary">
-            <span class="material-symbols-outlined !text-4xl">account_balance</span>
-          </div>
-          <h2 class="text-[#111618] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Bank App</h2>
-        </div>
-        <div class="flex items-center gap-9">
-          <a [routerLink]="['/dashboard']" class="text-sm font-medium leading-normal text-[#111618] dark:text-gray-300 hover:text-primary">Dashboard</a>
-          <a [routerLink]="['/transfers']" class="text-sm font-medium leading-normal text-primary">Transfers</a>
-          <a [routerLink]="['/beneficiaries']" class="text-sm font-medium leading-normal text-[#111618] dark:text-gray-300 hover:text-primary">Beneficiaries</a>
-        </div>
-      </div>
-      <div class="flex flex-1 justify-end gap-4 items-center">
-        <button (click)="openAddModal()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
-          <span class="truncate">+ Add Transfer</span>
-        </button>
-        <button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f0f3f4] dark:bg-gray-700 text-[#111618] dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-          <span class="material-symbols-outlined">notifications</span>
-        </button>
-        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 bg-gray-300"></div>
-      </div>
-    </header>
+<!-- src/app/componenents/transfer-component/transfer-component.html -->
+<div class="transfer-wrapper">
+  <!-- Navbar -->
+  <app-navbar></app-navbar>
 
+  <div class="transfer-container">
     <!-- Main Content -->
-    <main class="px-10 py-8">
-      <div class="flex flex-wrap justify-between gap-3 items-center mb-6">
-        <p class="text-[#111618] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Transfer History</p>
-      </div>
-
-      <!-- Error Message -->
-      <div *ngIf="error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-        {{ error }}
-      </div>
-
-      <!-- Search Bar -->
-      <div class="px-4 py-3 bg-white dark:bg-background-dark rounded-lg shadow-sm">
-        <label class="flex flex-col min-w-40 h-12 w-full">
-          <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
-            <div class="text-[#617c89] dark:text-gray-400 flex border-none bg-background-light dark:bg-gray-800 items-center justify-center pl-4 rounded-l-lg border-r-0">
-              <span class="material-symbols-outlined">search</span>
-            </div>
-            <input [(ngModel)]="searchQuery" (input)="searchTransfers()" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111618] dark:text-white focus:outline-0 focus:ring-0 border-none bg-background-light dark:bg-gray-800 focus:border-none h-full placeholder:text-[#617c89] dark:placeholder:text-gray-400 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Search by Beneficiary, Amount, etc." />
+    <main class="transfer-main">
+      <div class="content-wrapper">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="header-content">
+            <h1 class="page-title">Transfers</h1>
+            <p class="page-subtitle">View and manage your transfer history</p>
           </div>
-        </label>
-      </div>
-
-      <!-- Loading State -->
-      <div *ngIf="loading" class="flex justify-center items-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-
-      <!-- Transfers Table -->
-      <div *ngIf="!loading" class="mt-4 px-4 py-3 @container bg-white dark:bg-background-dark rounded-lg shadow-sm">
-        <div class="flex overflow-hidden rounded-lg border border-[#dbe2e6] dark:border-gray-700">
-          <table class="w-full flex-1">
-            <thead>
-            <tr class="bg-white dark:bg-background-dark">
-              <th class="px-4 py-3 text-left text-sm font-medium leading-normal text-[#111618] dark:text-gray-300">Id</th>
-              <th class="px-4 py-3 text-left text-sm font-medium leading-normal text-[#111618] dark:text-gray-300">Beneficiary Name</th>
-              <th class="px-4 py-3 text-left text-sm font-medium leading-normal text-[#111618] dark:text-gray-300">Source RIB</th>
-              <th class="px-4 py-3 text-left text-sm font-medium leading-normal text-[#111618] dark:text-gray-300">Amount</th>
-              <th class="px-4 py-3 text-left text-sm font-medium leading-normal text-[#111618] dark:text-gray-300">Description</th>
-              <th class="px-4 py-3 text-left text-sm font-medium leading-normal text-[#111618] dark:text-gray-300">Date</th>
-              <th class="px-4 py-3 text-left text-sm font-medium leading-normal text-[#111618] dark:text-gray-300">Type</th>
-              <th class="px-4 py-3 text-left text-sm font-medium leading-normal text-[#617c89] dark:text-gray-400">Actions</th>
-            </tr>
-            </thead>
-            <tbody class="divide-y divide-[#dbe2e6] dark:divide-gray-700">
-            <tr *ngFor="let transfer of filteredTransfers" class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-              <td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal text-[#617c89] dark:text-gray-400">#{{ transfer.id }}</td>
-              <td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal text-[#111618] dark:text-white">{{ transfer.beneficiaryName }}</td>
-              <td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal text-[#617c89] dark:text-gray-400">{{ maskRib(transfer.sourceRib) }}</td>
-              <td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal text-[#617c89] dark:text-gray-400">{{ formatAmount(transfer.amount) }}</td>
-              <td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal text-[#617c89] dark:text-gray-400">{{ transfer.description }}</td>
-              <td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal text-[#617c89] dark:text-gray-400">{{ transfer.date | date }}</td>
-              <td class="h-[72px] px-4 py-2 text-sm font-normal leading-normal">
-                  <span [ngClass]="getTypeClass(transfer.type)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-                    {{ transfer.type }}
-                  </span>
-              </td>
-              <td class="h-[72px] px-4 py-2 text-sm font-bold leading-normal tracking-[0.015em]">
-                <button (click)="openEditModal(transfer)" class="text-[#617c89] dark:text-gray-400 hover:text-primary dark:hover:text-primary mr-2">
-                  <span class="material-symbols-outlined text-base">edit</span>
-                </button>
-                <button (click)="deleteTransfer(transfer.id!)" class="text-[#617c89] dark:text-gray-400 hover:text-red-500">
-                  <span class="material-symbols-outlined text-base">delete</span>
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="filteredTransfers.length === 0">
-              <td colspan="8" class="px-6 py-8 text-center text-gray-500">
-                No transfers found
-              </td>
-            </tr>
-            </tbody>
-          </table>
+          <button (click)="openAddModal()" class="btn btn-primary">
+            <span class="material-symbols-outlined">send</span>
+            <span class="btn-text">New Transfer</span>
+          </button>
         </div>
-      </div>
 
-      <!-- Pagination -->
-      <div class="flex items-center justify-center p-4 mt-4">
-        <a (click)="goToPage(currentPage - 1)" [class.opacity-50]="currentPage === 1" class="flex size-10 items-center justify-center text-[#111618] dark:text-gray-400 cursor-pointer">
-          <span class="material-symbols-outlined">chevron_left</span>
-        </a>
-        <a *ngFor="let page of [1, 2, 3]" (click)="goToPage(page)" [class.bg-primary]="page === currentPage" [class.text-white]="page === currentPage" class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-[#111618] dark:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-          {{ page }}
-        </a>
-        <span class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-[#111618] dark:text-white rounded-full">...</span>
-        <a (click)="goToPage(totalPages)" class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-[#111618] dark:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-          {{ totalPages }}
-        </a>
-        <a (click)="goToPage(currentPage + 1)" [class.opacity-50]="currentPage === totalPages" class="flex size-10 items-center justify-center text-[#111618] dark:text-gray-400 cursor-pointer">
-          <span class="material-symbols-outlined">chevron_right</span>
-        </a>
+        <!-- Error Alert -->
+        <div *ngIf="error" class="alert alert-error">
+          <span class="material-symbols-outlined">error</span>
+          <div class="alert-content">
+            <p class="alert-title">Error</p>
+            <p class="alert-message">{{ error }}</p>
+          </div>
+          <button class="alert-close" (click)="error = null">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Search and Stats Bar -->
+        <div class="search-stats-bar">
+          <div class="search-container">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input
+              [(ngModel)]="searchQuery"
+              (input)="searchTransfers()"
+              type="text"
+              placeholder="Search by beneficiary, amount, or description..."
+              class="search-input"
+            />
+            <button *ngIf="searchQuery" (click)="searchQuery = ''; searchTransfers()" class="search-clear">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <div class="stats-badge">
+            <span class="material-symbols-outlined">swap_horiz</span>
+            <span>{{ filteredTransfers.length }} Transfers</span>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="loading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">Loading transfers...</p>
+        </div>
+
+        <!-- Transfers Content -->
+        <div *ngIf="!loading">
+          <!-- Desktop Table View -->
+          <div class="transfers-card desktop-view">
+            <div class="table-container">
+              <table class="transfers-table">
+                <thead>
+                <tr>
+                  <th>
+                    <div class="th-content">
+                      <span class="material-symbols-outlined">person</span>
+                      Beneficiary
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-content">
+                      <span class="material-symbols-outlined">account_balance</span>
+                      Source RIB
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-content">
+                      <span class="material-symbols-outlined">payments</span>
+                      Amount
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-content">
+                      <span class="material-symbols-outlined">calendar_today</span>
+                      Date
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-content">
+                      <span class="material-symbols-outlined">speed</span>
+                      Type
+                    </div>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let transfer of filteredTransfers" class="transfer-row">
+                  <td>
+                    <div class="beneficiary-info">
+                      <div class="beneficiary-avatar">
+                        {{ getInitial(transfer.beneficiaryName) }}
+                      </div>
+                      <div class="beneficiary-details">
+                        <span class="beneficiary-name">{{ transfer.beneficiaryName || 'Unknown' }}</span>
+                        <span class="transfer-description">{{ truncateText(transfer.description, 30) }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="rib-container">
+                      <span class="material-symbols-outlined rib-icon">credit_card</span>
+                      <span class="rib-text">{{ maskRib(transfer.sourceRib) }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="amount">{{ formatAmount(transfer.amount) }}</span>
+                  </td>
+                  <td>
+                    <div class="date-info">
+                      <span class="date-primary">{{ transfer.date | date:'MMM d, y' }}</span>
+                      <span class="date-secondary">{{ transfer.date | date:'h:mm a' }}</span>
+                    </div>
+                  </td>
+                  <td>
+                      <span [ngClass]="getTypeClass(transfer.type)" class="type-badge">
+                        <span class="type-icon material-symbols-outlined">
+                          {{ transfer.type === 'INSTANTANE' ? 'bolt' : 'schedule' }}
+                        </span>
+                        {{ transfer.type === 'INSTANTANE' ? 'Instant' : 'Normal' }}
+                      </span>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <button (click)="openEditModal(transfer)" class="btn-action btn-action-edit" title="Edit">
+                        <span class="material-symbols-outlined">edit</span>
+                      </button>
+                      <button (click)="deleteTransfer(transfer.id!)" class="btn-action btn-action-delete" title="Delete">
+                        <span class="material-symbols-outlined">delete</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="filteredTransfers.length === 0" class="empty-row">
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <div class="empty-icon">
+                        <span class="material-symbols-outlined">sync_alt</span>
+                      </div>
+                      <h3 class="empty-title">
+                        {{ searchQuery ? 'No transfers found' : 'No transfers yet' }}
+                      </h3>
+                      <p class="empty-description">
+                        {{ searchQuery ? 'Try adjusting your search' : 'Create your first transfer to get started' }}
+                      </p>
+                      <button *ngIf="!searchQuery" (click)="openAddModal()" class="btn btn-primary">
+                        <span class="material-symbols-outlined">add</span>
+                        New Transfer
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Mobile Card View -->
+          <div class="mobile-view">
+            <div *ngFor="let transfer of filteredTransfers" class="transfer-card-mobile">
+              <div class="card-header">
+                <div class="beneficiary-info">
+                  <div class="beneficiary-avatar">
+                    {{ getInitial(transfer.beneficiaryName) }}
+                  </div>
+                  <div class="beneficiary-details">
+                    <span class="beneficiary-name">{{ transfer.beneficiaryName || 'Unknown' }}</span>
+                    <span class="transfer-date">{{ transfer.date | date:'MMM d, y' }}</span>
+                  </div>
+                </div>
+                <span class="amount amount-mobile">{{ formatAmount(transfer.amount) }}</span>
+              </div>
+              <div class="card-body">
+                <div class="info-row">
+                  <span class="info-label">Source RIB</span>
+                  <span class="info-value">{{ maskRib(transfer.sourceRib) }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Description</span>
+                  <span class="info-value">{{ transfer.description }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Type</span>
+                  <span [ngClass]="getTypeClass(transfer.type)" class="type-badge type-badge-small">
+                    <span class="type-icon material-symbols-outlined">
+                      {{ transfer.type === 'INSTANTANE' ? 'bolt' : 'schedule' }}
+                    </span>
+                    {{ transfer.type === 'INSTANTANE' ? 'Instant' : 'Normal' }}
+                  </span>
+                </div>
+              </div>
+              <div class="card-footer">
+                <button (click)="openEditModal(transfer)" class="btn-mobile btn-mobile-edit">
+                  <span class="material-symbols-outlined">edit</span>
+                  Edit
+                </button>
+                <button (click)="deleteTransfer(transfer.id!)" class="btn-mobile btn-mobile-delete">
+                  <span class="material-symbols-outlined">delete</span>
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="filteredTransfers.length === 0" class="empty-state-mobile">
+              <div class="empty-icon">
+                <span class="material-symbols-outlined">sync_alt</span>
+              </div>
+              <h3 class="empty-title">
+                {{ searchQuery ? 'No transfers found' : 'No transfers yet' }}
+              </h3>
+              <p class="empty-description">
+                {{ searchQuery ? 'Try adjusting your search' : 'Create your first transfer to get started' }}
+              </p>
+              <button *ngIf="!searchQuery" (click)="openAddModal()" class="btn btn-primary">
+                <span class="material-symbols-outlined">add</span>
+                New Transfer
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
 
-  <!-- Floating Chat Button -->
-  <button [routerLink]="['/chatbot']" class="fixed bottom-8 right-8 bg-primary text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg">
-    <span class="material-symbols-outlined text-3xl">support_agent</span>
+  <!-- Floating Action Button -->
+  <button [routerLink]="['/chatbot']" class="fab" title="Chat with support">
+    <span class="material-symbols-outlined">support_agent</span>
+  </button>
+
+  <!-- Mobile FAB Add Button -->
+  <button (click)="openAddModal()" class="fab-add mobile-only" title="New transfer">
+    <span class="material-symbols-outlined">add</span>
   </button>
 </div>
 
 <!-- Modal -->
-<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-  <div class="bg-white dark:bg-background-dark rounded-lg shadow-xl max-w-lg w-full p-6">
-    <h3 class="text-2xl font-bold mb-4">{{ isEditMode ? 'Edit' : 'New' }} Transfer</h3>
+<div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title">{{ isEditMode ? 'Edit' : 'New' }} Transfer</h3>
+        <p class="modal-subtitle">{{ isEditMode ? 'Update transfer details' : 'Send money to a beneficiary' }}</p>
+      </div>
+      <button (click)="closeModal()" class="modal-close">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
 
-    <form (ngSubmit)="saveTransfer()">
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Beneficiary</label>
-          <select [(ngModel)]="currentTransfer.beneficiaryId" name="beneficiaryId" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white">
-            <option value="0">Select a beneficiary</option>
-            <option *ngFor="let ben of beneficiaries" [value]="ben.id">{{ ben.firstName }} {{ ben.lastName }}</option>
+    <form (ngSubmit)="saveTransfer()" class="modal-form">
+      <div class="form-grid">
+        <div class="form-group form-group-full">
+          <label class="form-label">
+            <span class="material-symbols-outlined">person</span>
+            Beneficiary
+          </label>
+          <select
+            [(ngModel)]="currentTransfer.beneficiaryId"
+            name="beneficiaryId"
+            required
+            class="form-select"
+          >
+            <option value="0" disabled>Select a beneficiary</option>
+            <option *ngFor="let ben of beneficiaries" [value]="ben.id">
+              {{ ben.firstName }} {{ ben.lastName }} ({{ maskRib(ben.rib) }})
+            </option>
           </select>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">Source RIB</label>
-          <input [(ngModel)]="currentTransfer.sourceRib" name="sourceRib" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white" />
+        <div class="form-group form-group-full">
+          <label class="form-label">
+            <span class="material-symbols-outlined">credit_card</span>
+            Source RIB (Your Account)
+          </label>
+          <input
+            [(ngModel)]="currentTransfer.sourceRib"
+            name="sourceRib"
+            required
+            type="text"
+            placeholder="Enter your account RIB"
+            class="form-input"
+          />
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">Amount (€)</label>
-          <input [(ngModel)]="currentTransfer.amount" name="amount" type="number" step="0.01" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white" />
+        <div class="form-group">
+          <label class="form-label">
+            <span class="material-symbols-outlined">payments</span>
+            Amount
+          </label>
+          <div class="input-with-icon">
+            <span class="input-icon">€</span>
+            <input
+              [(ngModel)]="currentTransfer.amount"
+              name="amount"
+              required
+              type="number"
+              step="0.01"
+              min="0.01"
+              placeholder="0.00"
+              class="form-input input-with-prefix"
+            />
+          </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">Description</label>
-          <textarea [(ngModel)]="currentTransfer.description" name="description" required rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white"></textarea>
+        <div class="form-group">
+          <label class="form-label">
+            <span class="material-symbols-outlined">calendar_today</span>
+            Transfer Date
+          </label>
+          <input
+            [(ngModel)]="currentTransfer.date"
+            name="date"
+            required
+            type="date"
+            class="form-input"
+          />
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">Date</label>
-          <input [(ngModel)]="currentTransfer.date" name="date" type="date" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white" />
+        <div class="form-group form-group-full">
+          <label class="form-label">
+            <span class="material-symbols-outlined">description</span>
+            Description
+          </label>
+          <textarea
+            [(ngModel)]="currentTransfer.description"
+            name="description"
+            required
+            rows="3"
+            placeholder="What's this transfer for?"
+            class="form-textarea"
+          ></textarea>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">Type</label>
-          <select [(ngModel)]="currentTransfer.type" name="type" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white">
-            <option value="NORMAL">Normal</option>
-            <option value="INSTANTANE">Instantané</option>
-          </select>
+        <div class="form-group form-group-full">
+          <label class="form-label">
+            <span class="material-symbols-outlined">speed</span>
+            Transfer Type
+          </label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input
+                type="radio"
+                [(ngModel)]="currentTransfer.type"
+                name="type"
+                value="NORMAL"
+                class="radio-input"
+              />
+              <div class="radio-card">
+                <span class="material-symbols-outlined">schedule</span>
+                <div>
+                  <span class="radio-title">Normal Transfer</span>
+                  <span class="radio-description">1-2 business days</span>
+                </div>
+              </div>
+            </label>
+            <label class="radio-label">
+              <input
+                type="radio"
+                [(ngModel)]="currentTransfer.type"
+                name="type"
+                value="INSTANTANE"
+                class="radio-input"
+              />
+              <div class="radio-card">
+                <span class="material-symbols-outlined">bolt</span>
+                <div>
+                  <span class="radio-title">Instant Transfer</span>
+                  <span class="radio-description">Within seconds</span>
+                </div>
+              </div>
+            </label>
+          </div>
         </div>
       </div>
 
-      <div class="flex gap-3 mt-6">
-        <button type="button" (click)="closeModal()" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+      <div class="modal-footer">
+        <button type="button" (click)="closeModal()" class="btn btn-secondary">
           Cancel
         </button>
-        <button type="submit" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-          {{ isEditMode ? 'Update' : 'Create' }}
+        <button type="submit" class="btn btn-primary">
+          <span class="material-symbols-outlined">{{ isEditMode ? 'check' : 'send' }}</span>
+          {{ isEditMode ? 'Update' : 'Send' }} Transfer
         </button>
       </div>
     </form>

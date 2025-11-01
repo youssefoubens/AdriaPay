@@ -1,154 +1,332 @@
-<!-- src/app/components/beneficiary/beneficiary.component.html -->
-<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
-  <div class="layout-container flex h-full grow flex-col">
-    <div class="px-4 md:px-10 lg:px-40 flex flex-1 justify-center py-5">
-      <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
-        <!-- Header -->
-        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-gray-200 dark:border-b-gray-700 px-4 sm:px-10 py-3">
-          <div class="flex items-center gap-4 text-gray-800 dark:text-white">
-            <div class="size-6 text-primary">
-              <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z" fill="currentColor"></path>
-              </svg>
-            </div>
-            <h2 class="text-lg font-bold tracking-tight">Bank</h2>
+<!-- src/app/componenents/beneficiary-component/beneficiary-component.html -->
+<div class="beneficiary-wrapper">
+  <!-- Navbar -->
+  <app-navbar></app-navbar>
+
+  <div class="beneficiary-container">
+    <!-- Main Content -->
+    <main class="beneficiary-main">
+      <div class="content-wrapper">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="header-content">
+            <h1 class="page-title">Beneficiaries</h1>
+            <p class="page-subtitle">Manage your trusted recipients</p>
           </div>
-          <div class="flex flex-1 justify-end gap-4">
-            <button class="flex items-center justify-center rounded-full h-10 w-10 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white">
-              <span class="material-symbols-outlined">notifications</span>
+          <button (click)="openAddModal()" class="btn btn-primary">
+            <span class="material-symbols-outlined">person_add</span>
+            <span class="btn-text">Add Beneficiary</span>
+          </button>
+        </div>
+
+        <!-- Error Alert -->
+        <div *ngIf="error" class="alert alert-error">
+          <span class="material-symbols-outlined">error</span>
+          <div class="alert-content">
+            <p class="alert-title">Error</p>
+            <p class="alert-message">{{ error }}</p>
+          </div>
+          <button class="alert-close" (click)="error = null">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Search and Stats Bar -->
+        <div class="search-stats-bar">
+          <div class="search-container">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input
+              [(ngModel)]="searchQuery"
+              (input)="searchBeneficiaries()"
+              type="text"
+              placeholder="Search by name, RIB, or type..."
+              class="search-input"
+            />
+            <button *ngIf="searchQuery" (click)="searchQuery = ''; searchBeneficiaries()" class="search-clear">
+              <span class="material-symbols-outlined">close</span>
             </button>
-            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 bg-gray-300"></div>
           </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-8">
-          <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
-            <p class="text-3xl lg:text-4xl font-black tracking-tighter text-gray-900 dark:text-white">Manage Beneficiaries</p>
-            <button (click)="openAddModal()" class="hidden sm:flex items-center justify-center rounded-lg h-12 bg-primary text-white text-base font-bold gap-2 px-6">
-              <span class="material-symbols-outlined">add</span>
-              <span>Add Beneficiary</span>
-            </button>
+          <div class="stats-badge">
+            <span class="material-symbols-outlined">group</span>
+            <span>{{ filteredBeneficiaries.length }} Total</span>
           </div>
+        </div>
 
-          <!-- Error Message -->
-          <div *ngIf="error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-            {{ error }}
-          </div>
+        <!-- Loading State -->
+        <div *ngIf="loading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">Loading beneficiaries...</p>
+        </div>
 
-          <!-- Search Bar -->
-          <div class="mb-6">
-            <label class="flex flex-col min-w-40 h-12 w-full">
-              <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
-                <div class="text-gray-500 dark:text-gray-400 flex border-none bg-white dark:bg-background-dark items-center justify-center pl-4 rounded-l-lg border-r-0">
-                  <span class="material-symbols-outlined">search</span>
-                </div>
-                <input [(ngModel)]="searchQuery" (input)="searchBeneficiaries()" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border border-gray-200 dark:border-gray-700 bg-white dark:bg-background-dark focus:border-primary h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal" placeholder="Search Beneficiaries"/>
-              </div>
-            </label>
-          </div>
-
-          <!-- Loading State -->
-          <div *ngIf="loading" class="flex justify-center items-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-
-          <!-- Beneficiaries Table -->
-          <div *ngIf="!loading" class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-background-dark">
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-800">
+        <!-- Beneficiaries Content -->
+        <div *ngIf="!loading">
+          <!-- Desktop Table View -->
+          <div class="beneficiaries-card desktop-view">
+            <div class="table-container">
+              <table class="beneficiaries-table">
+                <thead>
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">First Name</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Last Name</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">RIB</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                  <th>
+                    <div class="th-content">
+                      <span class="material-symbols-outlined">person</span>
+                      Name
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-content">
+                      <span class="material-symbols-outlined">account_balance</span>
+                      RIB
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-content">
+                      <span class="material-symbols-outlined">category</span>
+                      Type
+                    </div>
+                  </th>
+                  <th>Actions</th>
                 </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                <tr *ngFor="let beneficiary of filteredBeneficiaries">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">{{ beneficiary.id }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ beneficiary.firstName }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ beneficiary.lastName }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 font-mono">{{ maskRib(beneficiary.rib) }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">{{ beneficiary.type }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button (click)="openEditModal(beneficiary)" class="text-primary hover:text-primary/80 mr-2">
-                      <span class="material-symbols-outlined text-xl">edit</span>
-                    </button>
-                    <button (click)="deleteBeneficiary(beneficiary.id!)" class="text-red-600 hover:text-red-800">
-                      <span class="material-symbols-outlined text-xl">delete</span>
-                    </button>
+                <tbody>
+                <tr *ngFor="let beneficiary of filteredBeneficiaries" class="beneficiary-row">
+                  <td>
+                    <div class="beneficiary-info">
+                      <div class="beneficiary-avatar">
+                        {{ getInitial(beneficiary.firstName) }}
+                      </div>
+                      <div class="beneficiary-details">
+                        <span class="beneficiary-name">{{ beneficiary.firstName }} {{ beneficiary.lastName }}</span>
+                        <span class="beneficiary-id">ID: {{ beneficiary.id }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="rib-container">
+                      <span class="material-symbols-outlined rib-icon">credit_card</span>
+                      <span class="rib-text">{{ maskRib(beneficiary.rib) }}</span>
+                    </div>
+                  </td>
+                  <td>
+                      <span [ngClass]="getTypeClass(beneficiary.type)" class="type-badge">
+                        <span class="type-icon material-symbols-outlined">
+                          {{ beneficiary.type === 'PHYSIQUE' ? 'person' : 'business' }}
+                        </span>
+                        {{ beneficiary.type === 'PHYSIQUE' ? 'Personal' : 'Business' }}
+                      </span>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <button (click)="openEditModal(beneficiary)" class="btn-action btn-action-edit" title="Edit">
+                        <span class="material-symbols-outlined">edit</span>
+                      </button>
+                      <button (click)="deleteBeneficiary(beneficiary.id!)" class="btn-action btn-action-delete" title="Delete">
+                        <span class="material-symbols-outlined">delete</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
-                <tr *ngIf="filteredBeneficiaries.length === 0">
-                  <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                    No beneficiaries found
+                <tr *ngIf="filteredBeneficiaries.length === 0" class="empty-row">
+                  <td colspan="4">
+                    <div class="empty-state">
+                      <div class="empty-icon">
+                        <span class="material-symbols-outlined">group_off</span>
+                      </div>
+                      <h3 class="empty-title">
+                        {{ searchQuery ? 'No beneficiaries found' : 'No beneficiaries yet' }}
+                      </h3>
+                      <p class="empty-description">
+                        {{ searchQuery ? 'Try adjusting your search' : 'Add your first beneficiary to get started' }}
+                      </p>
+                      <button *ngIf="!searchQuery" (click)="openAddModal()" class="btn btn-primary">
+                        <span class="material-symbols-outlined">add</span>
+                        Add Beneficiary
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 </tbody>
               </table>
             </div>
           </div>
-        </main>
+
+          <!-- Mobile Card View -->
+          <div class="mobile-view">
+            <div *ngFor="let beneficiary of filteredBeneficiaries" class="beneficiary-card-mobile">
+              <div class="card-header">
+                <div class="beneficiary-info">
+                  <div class="beneficiary-avatar">
+                    {{ getInitial(beneficiary.firstName) }}
+                  </div>
+                  <div class="beneficiary-details">
+                    <span class="beneficiary-name">{{ beneficiary.firstName }} {{ beneficiary.lastName }}</span>
+                    <span class="beneficiary-id">ID: {{ beneficiary.id }}</span>
+                  </div>
+                </div>
+                <span [ngClass]="getTypeClass(beneficiary.type)" class="type-badge type-badge-small">
+                  <span class="type-icon material-symbols-outlined">
+                    {{ beneficiary.type === 'PHYSIQUE' ? 'person' : 'business' }}
+                  </span>
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="info-row">
+                  <span class="info-label">RIB</span>
+                  <span class="info-value">{{ maskRib(beneficiary.rib) }}</span>
+                </div>
+              </div>
+              <div class="card-footer">
+                <button (click)="openEditModal(beneficiary)" class="btn-mobile btn-mobile-edit">
+                  <span class="material-symbols-outlined">edit</span>
+                  Edit
+                </button>
+                <button (click)="deleteBeneficiary(beneficiary.id!)" class="btn-mobile btn-mobile-delete">
+                  <span class="material-symbols-outlined">delete</span>
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="filteredBeneficiaries.length === 0" class="empty-state-mobile">
+              <div class="empty-icon">
+                <span class="material-symbols-outlined">group_off</span>
+              </div>
+              <h3 class="empty-title">
+                {{ searchQuery ? 'No beneficiaries found' : 'No beneficiaries yet' }}
+              </h3>
+              <p class="empty-description">
+                {{ searchQuery ? 'Try adjusting your search' : 'Add your first beneficiary to get started' }}
+              </p>
+              <button *ngIf="!searchQuery" (click)="openAddModal()" class="btn btn-primary">
+                <span class="material-symbols-outlined">add</span>
+                Add Beneficiary
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 
-  <!-- Floating Chat Button -->
-  <div class="fixed bottom-6 left-6">
-    <button [routerLink]="['/chatbot']" class="flex items-center justify-center rounded-full h-14 w-14 bg-teal-500 text-white shadow-lg hover:bg-teal-600 transition-colors">
-      <span class="material-symbols-outlined text-3xl">chat_bubble</span>
-    </button>
-  </div>
+  <!-- Floating Action Button -->
+  <button [routerLink]="['/chatbot']" class="fab" title="Chat with support">
+    <span class="material-symbols-outlined">support_agent</span>
+  </button>
 
-  <!-- Mobile Add Button -->
-  <div class="fixed bottom-6 right-6 sm:hidden">
-    <button (click)="openAddModal()" class="flex items-center justify-center rounded-full h-14 w-14 bg-primary text-white shadow-lg hover:bg-primary/90 transition-colors">
-      <span class="material-symbols-outlined text-3xl">add</span>
-    </button>
-  </div>
+  <!-- Mobile FAB Add Button -->
+  <button (click)="openAddModal()" class="fab-add mobile-only" title="Add beneficiary">
+    <span class="material-symbols-outlined">add</span>
+  </button>
 </div>
 
 <!-- Modal -->
-<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-  <div class="bg-white dark:bg-background-dark rounded-lg shadow-xl max-w-md w-full p-6">
-    <h3 class="text-2xl font-bold mb-4">{{ isEditMode ? 'Edit' : 'Add' }} Beneficiary</h3>
+<div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title">{{ isEditMode ? 'Edit' : 'Add' }} Beneficiary</h3>
+        <p class="modal-subtitle">{{ isEditMode ? 'Update beneficiary information' : 'Add a new trusted recipient' }}</p>
+      </div>
+      <button (click)="closeModal()" class="modal-close">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
 
-    <form (ngSubmit)="saveBeneficiary()">
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">First Name</label>
-          <input [(ngModel)]="currentBeneficiary.firstName" name="firstName" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white" />
+    <form (ngSubmit)="saveBeneficiary()" class="modal-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">
+            <span class="material-symbols-outlined">person</span>
+            First Name
+          </label>
+          <input
+            [(ngModel)]="currentBeneficiary.firstName"
+            name="firstName"
+            required
+            type="text"
+            placeholder="Enter first name"
+            class="form-input"
+          />
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">Last Name</label>
-          <input [(ngModel)]="currentBeneficiary.lastName" name="lastName" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white" />
+        <div class="form-group">
+          <label class="form-label">
+            <span class="material-symbols-outlined">person</span>
+            Last Name
+          </label>
+          <input
+            [(ngModel)]="currentBeneficiary.lastName"
+            name="lastName"
+            required
+            type="text"
+            placeholder="Enter last name"
+            class="form-input"
+          />
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">RIB</label>
-          <input [(ngModel)]="currentBeneficiary.rib" name="rib" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white" />
+        <div class="form-group form-group-full">
+          <label class="form-label">
+            <span class="material-symbols-outlined">credit_card</span>
+            RIB (Bank Account Number)
+          </label>
+          <input
+            [(ngModel)]="currentBeneficiary.rib"
+            name="rib"
+            required
+            type="text"
+            placeholder="Enter RIB number"
+            class="form-input"
+          />
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">Type</label>
-          <select [(ngModel)]="currentBeneficiary.type" name="type" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white">
-            <option value="PHYSIQUE">Personal</option>
-            <option value="MORALE">Business</option>
-          </select>
+        <div class="form-group form-group-full">
+          <label class="form-label">
+            <span class="material-symbols-outlined">category</span>
+            Account Type
+          </label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input
+                type="radio"
+                [(ngModel)]="currentBeneficiary.type"
+                name="type"
+                value="PHYSIQUE"
+                class="radio-input"
+              />
+              <div class="radio-card">
+                <span class="material-symbols-outlined">person</span>
+                <div>
+                  <span class="radio-title">Personal</span>
+                  <span class="radio-description">Individual account</span>
+                </div>
+              </div>
+            </label>
+            <label class="radio-label">
+              <input
+                type="radio"
+                [(ngModel)]="currentBeneficiary.type"
+                name="type"
+                value="MORALE"
+                class="radio-input"
+              />
+              <div class="radio-card">
+                <span class="material-symbols-outlined">business</span>
+                <div>
+                  <span class="radio-title">Business</span>
+                  <span class="radio-description">Company account</span>
+                </div>
+              </div>
+            </label>
+          </div>
         </div>
       </div>
 
-      <div class="flex gap-3 mt-6">
-        <button type="button" (click)="closeModal()" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+      <div class="modal-footer">
+        <button type="button" (click)="closeModal()" class="btn btn-secondary">
           Cancel
         </button>
-        <button type="submit" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-          {{ isEditMode ? 'Update' : 'Create' }}
+        <button type="submit" class="btn btn-primary">
+          <span class="material-symbols-outlined">{{ isEditMode ? 'check' : 'add' }}</span>
+          {{ isEditMode ? 'Update' : 'Create' }} Beneficiary
         </button>
       </div>
     </form>

@@ -4,13 +4,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ChatbotService, Message } from '../../services/ChatbotService/chatbot-service';
+import { NavbarComponent } from '../navbar-component/navbar-component';
 
 @Component({
   selector: 'app-chatbot',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, NavbarComponent],
   templateUrl: './chatbot-component.html',
-  styleUrls: ['./chatbot-component.css']
+  styleUrls: ['./chatbot-component.css'],
+
 })
 export class ChatbotComponent implements OnInit, AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -19,17 +21,22 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   userMessage = '';
   isTyping = false;
   error: string | null = null;
+  private shouldScroll = false;
 
   constructor(private chatbotService: ChatbotService) { }
 
   ngOnInit(): void {
     this.chatbotService.messages$.subscribe(messages => {
       this.messages = messages;
+      this.shouldScroll = true;
     });
   }
 
   ngAfterViewChecked(): void {
-    this.scrollToBottom();
+    if (this.shouldScroll) {
+      this.scrollToBottom();
+      this.shouldScroll = false;
+    }
   }
 
   sendMessage(): void {
@@ -37,7 +44,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
       return;
     }
 
-    const message = this.userMessage;
+    const message = this.userMessage.trim();
     this.userMessage = '';
     this.isTyping = true;
     this.error = null;
@@ -56,6 +63,11 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  sendQuickMessage(message: string): void {
+    this.userMessage = message;
+    this.sendMessage();
+  }
+
   onKeyPress(event: KeyboardEvent): void {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
@@ -66,8 +78,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   private scrollToBottom(): void {
     try {
       if (this.messagesContainer) {
-        this.messagesContainer.nativeElement.scrollTop =
-          this.messagesContainer.nativeElement.scrollHeight;
+        const element = this.messagesContainer.nativeElement;
+        element.scrollTop = element.scrollHeight;
       }
     } catch (err) {
       console.error('Error scrolling:', err);
@@ -75,13 +87,20 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   }
 
   clearChat(): void {
+    if (this.messages.length === 0) {
+      return;
+    }
+
     if (confirm('Are you sure you want to clear the chat history?')) {
       this.chatbotService.clearMessages();
+      this.error = null;
     }
   }
 
   logout(): void {
-    // Implement logout logic
-    window.location.href = '/login';
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    window.location.href = '/signin';
   }
 }

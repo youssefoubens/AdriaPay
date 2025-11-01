@@ -16,7 +16,7 @@ export interface Beneficiary {
   providedIn: 'root'
 })
 export class BeneficiaryService {
-  private apiUrl = `${environment.apiUrl}/beneficiaire-service/api/beneficiaries`;
+  private apiUrl = `${environment.apiUrl}/BENEFICIAIRE-SERVICE/api/beneficiaires`;
 
   constructor(private http: HttpClient) { }
 

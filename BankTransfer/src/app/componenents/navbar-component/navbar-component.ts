@@ -8,8 +8,8 @@ import { filter } from 'rxjs/operators';
   selector: 'app-navbar',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css']
+  templateUrl: './navbar-component.html',
+  styleUrls: ['./navbar-component.css']
 })
 export class NavbarComponent implements OnInit {
   currentRoute = '/dashboard';

@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { BeneficiaryService, Beneficiary } from '../../services/BeneficiaryService/beneficiary-service';
+import { NavbarComponent } from '../navbar-component/navbar-component';
 
 @Component({
   selector: 'app-beneficiary',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, NavbarComponent],
   templateUrl: './beneficiary-component.html',
   styleUrls: ['./beneficiary-component.css']
 })
@@ -55,10 +56,10 @@ export class BeneficiaryComponent implements OnInit {
 
     const query = this.searchQuery.toLowerCase();
     this.filteredBeneficiaries = this.beneficiaries.filter(b =>
-      b.firstName.toLowerCase().includes(query) ||
-      b.lastName.toLowerCase().includes(query) ||
-      b.rib.toLowerCase().includes(query) ||
-      b.type.toLowerCase().includes(query)
+      b.firstName?.toLowerCase().includes(query) ||
+      b.lastName?.toLowerCase().includes(query) ||
+      b.rib?.toLowerCase().includes(query) ||
+      b.type?.toLowerCase().includes(query)
     );
   }
 
@@ -132,7 +133,15 @@ export class BeneficiaryComponent implements OnInit {
   }
 
   maskRib(rib: string): string {
-    if (rib.length <= 8) return rib;
-    return rib.substring(0, 4) + '...' + rib.substring(rib.length - 5);
+    if (!rib || rib.length <= 8) return rib;
+    return rib.substring(0, 4) + '****' + rib.substring(rib.length - 4);
+  }
+
+  getInitial(name?: string): string {
+    return name?.charAt(0).toUpperCase() || '?';
+  }
+
+  getTypeClass(type: string): string {
+    return type === 'PHYSIQUE' ? 'type-personal' : 'type-business';
   }
 }

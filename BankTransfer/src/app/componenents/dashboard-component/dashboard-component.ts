@@ -3,11 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { TransferService, Transfer, DashboardStats } from '../../services/TransferService/transfer-service';
+import { NavbarComponent } from '../navbar-component/navbar-component'; // Import NavbarComponent
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NavbarComponent], // Add NavbarComponent to imports
   templateUrl: './dashboard-component.html',
   styleUrls: ['./dashboard-component.css']
 })
@@ -93,8 +94,16 @@ export class DashboardComponent implements OnInit {
     }).format(amount);
   }
 
+  // Helper method to get first letter safely
+  getInitial(name?: string): string {
+    return name?.charAt(0).toUpperCase() || '?';
+  }
+
   logout(): void {
     // Implement logout logic
-    this.router.navigate(['/login']);
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    this.router.navigate(['/signin']);
   }
 }

@@ -22,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/beneficiaires")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @Tag(name = "Bénéficiaires", description = "API de gestion des bénéficiaires bancaires")
 public class BeneficiaireController {
 

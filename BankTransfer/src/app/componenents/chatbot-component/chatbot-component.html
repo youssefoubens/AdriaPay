@@ -1,100 +1,159 @@
-<!-- src/app/components/chatbot/chatbot.component.html -->
-<div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark">
-  <div class="layout-container flex h-full grow flex-col">
-    <div class="flex flex-1 justify-center">
-      <div class="layout-content-container flex flex-col w-full max-w-5xl flex-1 bg-white dark:bg-background-dark shadow-lg">
-        <!-- Header -->
-        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-700 px-6 py-4">
-          <div class="flex items-center gap-4 text-gray-800 dark:text-white">
-            <span class="material-symbols-outlined text-primary text-3xl">account_balance</span>
-            <h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">Bank App</h2>
+<!-- src/app/componenents/chatbot-component/chatbot-component.html -->
+<div class="chatbot-wrapper">
+  <!-- Navbar -->
+  <app-navbar></app-navbar>
+
+  <div class="chatbot-container">
+    <!-- Main Content -->
+    <main class="chatbot-main">
+      <div class="chat-layout">
+        <!-- Chat Header -->
+        <div class="chat-header">
+          <div class="chat-header-content">
+            <div class="bot-avatar-large">
+              <span class="material-symbols-outlined">support_agent</span>
+            </div>
+            <div class="bot-info">
+              <h1 class="bot-name">Banking Assistant</h1>
+              <p class="bot-status">
+                <span class="status-indicator"></span>
+                Online • Ready to help
+              </p>
+            </div>
           </div>
-          <div class="hidden md:flex items-center gap-8">
-            <a [routerLink]="['/dashboard']" class="text-gray-800 dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary">Home</a>
-            <a [routerLink]="['/transfers']" class="text-gray-800 dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary">Transfers</a>
-            <a [routerLink]="['/beneficiaries']" class="text-gray-800 dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary">Beneficiaries</a>
-            <a [routerLink]="['/chatbot']" class="text-primary dark:text-primary text-sm font-bold leading-normal">Chatbot</a>
-          </div>
-          <div class="flex items-center gap-4">
-            <button (click)="logout()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
-              <span class="truncate">Logout</span>
+          <div class="chat-header-actions">
+            <button (click)="clearChat()" class="btn-icon" title="Clear chat">
+              <span class="material-symbols-outlined">delete_sweep</span>
             </button>
-            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 bg-gray-300"></div>
           </div>
-        </header>
+        </div>
 
-        <!-- Main Chat Area -->
-        <main class="flex-1 flex flex-col overflow-hidden">
-          <!-- Error Message -->
-          <div *ngIf="error" class="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-            {{ error }}
+        <!-- Error Alert -->
+        <div *ngIf="error" class="alert alert-error">
+          <span class="material-symbols-outlined">error</span>
+          <div class="alert-content">
+            <p class="alert-title">Error</p>
+            <p class="alert-message">{{ error }}</p>
+          </div>
+          <button class="alert-close" (click)="error = null">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Messages Container -->
+        <div #messagesContainer class="messages-container">
+          <!-- Welcome Message -->
+          <div *ngIf="messages.length === 0" class="welcome-message">
+            <div class="welcome-icon">
+              <span class="material-symbols-outlined">waving_hand</span>
+            </div>
+            <h2 class="welcome-title">Welcome to Banking Assistant!</h2>
+            <p class="welcome-description">I'm here to help you with your banking needs. Ask me about transfers, beneficiaries, or account information.</p>
+            <div class="quick-actions">
+              <button (click)="sendQuickMessage('How do I add a beneficiary?')" class="quick-action-btn">
+                <span class="material-symbols-outlined">person_add</span>
+                Add Beneficiary
+              </button>
+              <button (click)="sendQuickMessage('How do I make a transfer?')" class="quick-action-btn">
+                <span class="material-symbols-outlined">send</span>
+                Make Transfer
+              </button>
+              <button (click)="sendQuickMessage('Show my recent transactions')" class="quick-action-btn">
+                <span class="material-symbols-outlined">history</span>
+                View History
+              </button>
+            </div>
           </div>
 
-          <!-- Messages Container -->
-          <div #messagesContainer class="flex-1 p-6 overflow-y-auto space-y-6">
-            <div *ngFor="let message of messages" [ngClass]="message.sender === 'user' ? 'flex items-end gap-3 p-4 justify-end' : 'flex items-end gap-3 p-4 max-w-lg'">
-              <!-- Bot Avatar (left side) -->
-              <div *ngIf="message.sender === 'bot'" class="bg-primary/20 bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 h-10 shrink-0 border-2 border-white dark:border-gray-700 flex items-center justify-center">
-                <span class="material-symbols-outlined text-primary">smart_toy</span>
+          <!-- Chat Messages -->
+          <div *ngFor="let message of messages; let i = index"
+               class="message-wrapper"
+               [ngClass]="message.sender === 'user' ? 'message-wrapper-user' : 'message-wrapper-bot'"
+               [@messageAnimation]>
+
+            <!-- Bot Message -->
+            <div *ngIf="message.sender === 'bot'" class="message message-bot">
+              <div class="message-avatar">
+                <span class="material-symbols-outlined">support_agent</span>
               </div>
-
-              <!-- Message Content -->
-              <div class="flex flex-1 flex-col gap-1" [ngClass]="message.sender === 'user' ? 'items-end' : 'items-start'">
-                <p class="text-gray-500 dark:text-gray-400 text-xs font-normal leading-normal max-w-[360px]" [ngClass]="message.sender === 'user' ? 'text-right' : ''">
-                  {{ message.sender === 'user' ? 'You' : 'Chatbot' }}
-                </p>
-                <div class="text-base font-normal leading-normal flex max-w-md rounded-lg px-4 py-3 shadow-sm"
-                     [ngClass]="message.sender === 'user' ? 'rounded-br-none bg-primary text-white' : 'rounded-bl-none bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'">
-                  <p [innerHTML]="message.content"></p>
+              <div class="message-content-wrapper">
+                <div class="message-header">
+                  <span class="message-sender">Banking Assistant</span>
+                  <span class="message-time">{{ message.timestamp | date:'shortTime' }}</span>
+                </div>
+                <div class="message-bubble message-bubble-bot">
+                  <div [innerHTML]="message.content"></div>
                 </div>
               </div>
-
-              <!-- User Avatar (right side) -->
-              <div *ngIf="message.sender === 'user'" class="bg-gray-300 bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 h-10 shrink-0 border-2 border-white dark:border-gray-700 flex items-center justify-center">
-                <span class="material-symbols-outlined text-gray-600">person</span>
-              </div>
             </div>
 
-            <!-- Typing Indicator -->
-            <div *ngIf="isTyping" class="flex items-end gap-3 p-4 max-w-lg">
-              <div class="bg-primary/20 bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 h-10 shrink-0 border-2 border-white dark:border-gray-700 flex items-center justify-center">
-                <span class="material-symbols-outlined text-primary">smart_toy</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <div class="h-2 w-2 bg-primary rounded-full animate-pulse" style="animation-delay: -0.3s"></div>
-                <div class="h-2 w-2 bg-primary rounded-full animate-pulse" style="animation-delay: -0.15s"></div>
-                <div class="h-2 w-2 bg-primary rounded-full animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Input Area -->
-          <div class="border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-background-dark">
-            <div class="flex items-center gap-4">
-              <div class="bg-gray-300 bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 shrink-0 flex items-center justify-center">
-                <span class="material-symbols-outlined text-gray-600">person</span>
-              </div>
-              <label class="flex flex-col min-w-40 h-12 flex-1">
-                <div class="flex w-full flex-1 items-stretch rounded-full h-full">
-                  <input
-                    [(ngModel)]="userMessage"
-                    (keypress)="onKeyPress($event)"
-                    [disabled]="isTyping"
-                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 border-gray-300 dark:border-gray-600 bg-background-light dark:bg-gray-800 focus:border-primary h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-5 text-base font-normal leading-normal"
-                    placeholder="Type your message..."
-                  />
-                  <button
-                    (click)="sendMessage()"
-                    [disabled]="!userMessage.trim() || isTyping"
-                    class="flex items-center justify-center -ml-12 z-10 size-10 rounded-full bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    <span class="material-symbols-outlined text-2xl">send</span>
-                  </button>
+            <!-- User Message -->
+            <div *ngIf="message.sender === 'user'" class="message message-user">
+              <div class="message-content-wrapper">
+                <div class="message-header">
+                  <span class="message-time">{{ message.timestamp | date:'shortTime' }}</span>
+                  <span class="message-sender">You</span>
                 </div>
-              </label>
+                <div class="message-bubble message-bubble-user">
+                  <p>{{ message.content }}</p>
+                </div>
+              </div>
+              <div class="message-avatar message-avatar-user">
+                <span class="material-symbols-outlined">person</span>
+              </div>
             </div>
           </div>
-        </main>
+
+          <!-- Typing Indicator -->
+          <div *ngIf="isTyping" class="message-wrapper message-wrapper-bot" [@messageAnimation]>
+            <div class="message message-bot">
+              <div class="message-avatar">
+                <span class="material-symbols-outlined">support_agent</span>
+              </div>
+              <div class="message-content-wrapper">
+                <div class="message-header">
+                  <span class="message-sender">Banking Assistant</span>
+                </div>
+                <div class="typing-indicator">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+          <div class="input-container">
+            <button class="btn-attachment" title="Attach file" disabled>
+              <span class="material-symbols-outlined">attach_file</span>
+            </button>
+            <input
+              [(ngModel)]="userMessage"
+              (keypress)="onKeyPress($event)"
+              [disabled]="isTyping"
+              type="text"
+              placeholder="Type your message..."
+              class="message-input"
+            />
+            <button
+              (click)="sendMessage()"
+              [disabled]="!userMessage.trim() || isTyping"
+              class="btn-send"
+              title="Send message">
+              <span class="material-symbols-outlined">send</span>
+            </button>
+          </div>
+          <p class="input-hint">Press Enter to send • Shift + Enter for new line</p>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
+
+  <!-- Back to Dashboard FAB -->
+  <button [routerLink]="['/dashboard']" class="fab" title="Back to dashboard">
+    <span class="material-symbols-outlined">home</span>
+  </button>
 </div>
