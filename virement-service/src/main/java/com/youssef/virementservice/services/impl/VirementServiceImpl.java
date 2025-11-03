@@ -1,4 +1,3 @@
-
 package com.youssef.virementservice.services.impl;
 
 import com.youssef.virementservice.client.BeneficiaireClient;
@@ -9,6 +8,9 @@ import com.youssef.virementservice.models.Beneficiaire;
 import com.youssef.virementservice.repositories.VirementRepo;
 import com.youssef.virementservice.services.VirementService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,16 +19,29 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class VirementServiceImpl implements VirementService {
 
     private final VirementRepo virementRepository;
     private final VirementMapper virementMapper;
     private final BeneficiaireClient beneficiaireClient;
+    private final CircuitBreakerFactory cbFactory;
 
     @Override
     public VirementDTO saveVirement(VirementDTO virementDTO) {
-        // Fetch Beneficiaire from beneficiaire-service
-        Beneficiaire beneficiaire = beneficiaireClient.getBeneficiaireByRib(virementDTO.getBeneficiaire().getRib());
+        // Create circuit breaker instance
+        CircuitBreaker circuitBreaker = cbFactory.create("beneficiaireService");
+
+        // Fetch Beneficiaire from beneficiaire-service with circuit breaker
+        Beneficiaire beneficiaire = circuitBreaker.run(
+                () -> beneficiaireClient.getBeneficiaireByRib(virementDTO.getBeneficiaire().getRib()),
+                throwable -> {
+                    log.error("Circuit breaker fallback triggered for beneficiaire RIB: {}. Error: {}",
+                            virementDTO.getBeneficiaire().getRib(), throwable.getMessage());
+                    return getFallbackBeneficiaire(virementDTO.getBeneficiaire().getRib());
+                }
+        );
+
         virementDTO.setBeneficiaire(beneficiaire);
 
         Virement virement = virementMapper.toEntity(virementDTO);
@@ -79,7 +94,11 @@ public class VirementServiceImpl implements VirementService {
         return virementRepository.findById(id)
                 .map(v -> {
                     VirementDTO dto = virementMapper.toDTO(v);
-                    dto.setBeneficiaire(v.getBeneficiaire()); // set transient field
+                    // Fetch beneficiaire with circuit breaker
+                    if (v.getBeneficiaireRib() != null) {
+                        Beneficiaire beneficiaire = fetchBeneficiaireWithCircuitBreaker(v.getBeneficiaireRib());
+                        dto.setBeneficiaire(beneficiaire);
+                    }
                     return dto;
                 });
     }
@@ -90,23 +109,54 @@ public class VirementServiceImpl implements VirementService {
                 .stream()
                 .map(v -> {
                     VirementDTO dto = virementMapper.toDTO(v);
-                    dto.setBeneficiaire(v.getBeneficiaire());
+                    // Fetch beneficiaire with circuit breaker
+                    if (v.getBeneficiaireRib() != null) {
+                        Beneficiaire beneficiaire = fetchBeneficiaireWithCircuitBreaker(v.getBeneficiaireRib());
+                        dto.setBeneficiaire(beneficiaire);
+                    }
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
 
     @Override
-
     public List<VirementDTO> getVirementsByBeneficiaireRib(String rib) {
         return virementRepository.findByBeneficiaireRib(rib)
                 .stream()
                 .map(v -> {
                     VirementDTO dto = virementMapper.toDTO(v);
-                    dto.setBeneficiaire(v.getBeneficiaire());
+                    // Fetch beneficiaire with circuit breaker
+                    Beneficiaire beneficiaire = fetchBeneficiaireWithCircuitBreaker(rib);
+                    dto.setBeneficiaire(beneficiaire);
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Helper method to fetch beneficiaire with circuit breaker protection
+     */
+    private Beneficiaire fetchBeneficiaireWithCircuitBreaker(String rib) {
+        CircuitBreaker circuitBreaker = cbFactory.create("beneficiaireService");
+        return circuitBreaker.run(
+                () -> beneficiaireClient.getBeneficiaireByRib(rib),
+                throwable -> {
+                    log.warn("Circuit breaker fallback triggered for RIB: {}. Error: {}",
+                            rib, throwable.getMessage());
+                    return getFallbackBeneficiaire(rib);
+                }
+        );
+    }
+
+    /**
+     * Fallback method when beneficiaire service is unavailable
+     */
+    private Beneficiaire getFallbackBeneficiaire(String rib) {
+        log.info("Returning fallback beneficiaire for RIB: {}", rib);
+        Beneficiaire fallback = new Beneficiaire();
+        fallback.setRib(rib);
+        fallback.setNom("Service Unavailable");
+        // Set other default values as needed
+        return fallback;
+    }
 }

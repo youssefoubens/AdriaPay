@@ -1,4 +1,4 @@
-// src/app/componenents/chatbot-component/chatbot-component.ts
+// src/app/components/chatbot-component/chatbot-component.ts
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +12,6 @@ import { NavbarComponent } from '../navbar-component/navbar-component';
   imports: [CommonModule, FormsModule, RouterModule, NavbarComponent],
   templateUrl: './chatbot-component.html',
   styleUrls: ['./chatbot-component.css'],
-
 })
 export class ChatbotComponent implements OnInit, AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -51,13 +50,26 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
     this.chatbotService.sendMessage(message).subscribe({
       next: (response) => {
-        this.chatbotService.addBotMessage(response.message);
+
         this.isTyping = false;
       },
       error: (err) => {
         console.error('Error sending message:', err);
-        this.error = 'Failed to send message. Please try again.';
-        this.chatbotService.addBotMessage('Sorry, I encountered an error. Please try again.');
+
+        // More detailed error handling
+        if (err.status === 0) {
+          this.error = 'Unable to connect to the server. Please check your connection.';
+        } else if (err.status === 404) {
+          this.error = 'Chatbot service not found. Please contact support.';
+        } else if (err.status === 500) {
+          this.error = 'Server error. Please try again later.';
+        } else {
+          this.error = err.error?.message || 'Failed to send message. Please try again.';
+        }
+
+        this.chatbotService.addBotMessage(
+          'Sorry, I encountered an error processing your request. Please try again.'
+        );
         this.isTyping = false;
       }
     });
@@ -87,20 +99,52 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   }
 
   clearChat(): void {
-    if (this.messages.length === 0) {
+    if (this.messages.length <= 1) { // Only initial greeting message
       return;
     }
 
     if (confirm('Are you sure you want to clear the chat history?')) {
       this.chatbotService.clearMessages();
       this.error = null;
+      this.userMessage = '';
+      this.isTyping = false;
+    }
+  }
+
+  // Optional: Method to get current session ID
+  getSessionId(): string | null {
+    return this.chatbotService.getSessionId();
+  }
+
+  // Optional: Method to view chat history
+  viewHistory(): void {
+    const sessionId = this.chatbotService.getSessionId();
+    if (sessionId) {
+      this.chatbotService.getChatHistory(sessionId).subscribe({
+        next: (history) => {
+          console.log('Chat history:', history);
+          // You can display this in a modal or separate component
+        },
+        error: (err) => {
+          console.error('Error fetching history:', err);
+          this.error = 'Failed to load chat history.';
+        }
+      });
     }
   }
 
   logout(): void {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userName');
-    window.location.href = '/signin';
+    if (confirm('Are you sure you want to logout?')) {
+      // Clear chat before logout
+      this.chatbotService.clearMessages();
+
+      // Clear authentication
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userName');
+
+      // Redirect to signin
+      window.location.href = '/signin';
+    }
   }
 }
